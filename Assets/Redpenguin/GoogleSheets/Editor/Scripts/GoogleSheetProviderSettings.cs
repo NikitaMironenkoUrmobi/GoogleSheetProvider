@@ -1,35 +1,11 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using NUnit.Framework;
+using Redpenguin.GoogleSheets.Runtime.Core;
 using UnityEngine;
 using UnityEngine.Serialization;
 
 namespace Redpenguin.GoogleSheets.Editor
 {
-  [Serializable]
-  public class GoogleSheetMetaData
-  {
-    public List<SheetContainerMetaData> sheetContainerMetaData;
-    public SheetContainerMetaData Get(string containerType)
-    {
-      var data = sheetContainerMetaData.Find(x => x.containerType == containerType);
-      if (data == null)
-      {
-        data = new SheetContainerMetaData {containerType = containerType};
-        sheetContainerMetaData.Add(data);
-      }
-      return data;
-    }
-  }
-  public interface IMetaData {}
-  [Serializable]
-  public class SheetContainerMetaData : IMetaData
-  {
-    public string containerType;
-    public string savePath;
-    public string fileName;
-  }
   [CreateAssetMenu(fileName = "GoogleSheetProviderSettings", menuName = "GoogleSheetProvider/Settings")]
   public class GoogleSheetProviderSettings : ScriptableObject
   {
@@ -37,12 +13,19 @@ namespace Redpenguin.GoogleSheets.Editor
     public TextAsset credential;
     public List<SerializationGroup> serializationGroups;
 
-    public SerializationGroup defaultGroup;
-    
+    public SerializationGroup defaultGroup = new()
+    {
+      tag = "Default",
+      color = new Color32(87, 165, 140, 255)
+    };
+
+    private void Awake()
+    {
+      currentGroup ??= defaultGroup;
+    }
+
     [HideInInspector] 
     public SerializationGroup currentGroup;
-
-    public GoogleSheetMetaData googleSheetMetaData;
     public List<SerializationGroup> SerializationGroups => GetSerializationGroups();
 
     private List<SerializationGroup> GetSerializationGroups()

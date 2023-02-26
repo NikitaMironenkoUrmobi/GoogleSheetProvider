@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Redpenguin.GoogleSheets.Editor;
+using Redpenguin.GoogleSheets.Runtime.Core;
 using Redpenguin.GoogleSheets.Scripts.Runtime.Core;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -14,17 +15,17 @@ namespace Redpenguin.GoogleSheets.Scripts.Editor.Core
     private ISpreadSheetSO _spreadSheetSo;
     private readonly List<RuleButton> _buttons = new();
     private VisualElement _pathContainer;
-    private GoogleSheetMetaData _googleSheetMetaData;
     private TextField _savePath;
     private TextField _fileName;
+    private SerializationGroup _currentGroup;
 
-    public SheetEditorPresenter(VisualElement view, ScriptableObject model, List<SerializationGroup> rules, GoogleSheetMetaData googleSheetMetaData)
+    public SheetEditorPresenter(VisualElement view, ScriptableObject model, List<SerializationGroup> rules)
     {
-      _googleSheetMetaData = googleSheetMetaData;
       SetView(view);
       ModelViewLink(model, rules);
       LoadMeta();
     }
+
     private void ModelViewLink(ScriptableObject scriptableObject, List<SerializationGroup> serializationGroups)
     {
       _containerObject.SetValueWithoutNotify(scriptableObject);
@@ -39,11 +40,13 @@ namespace Redpenguin.GoogleSheets.Scripts.Editor.Core
         ruleButton.SetDarker(_spreadSheetSo.SerializationGroupTag == serializationGroup.tag ? 0 : 50);
         if (_spreadSheetSo.SerializationGroupTag == serializationGroup.tag)
         {
-          _pathContainer.style.display = 
-            serializationGroup.packSeparately
+          _currentGroup = serializationGroup;
+          _pathContainer.style.display =
+            serializationGroup.serializationRule.PackSeparately
               ? DisplayStyle.Flex
               : DisplayStyle.None;
         }
+
         _rulesContainer.Add(button);
         _buttons.Add(ruleButton);
       }
@@ -56,15 +59,18 @@ namespace Redpenguin.GoogleSheets.Scripts.Editor.Core
         button.SetDarker(button.Group.tag == tag ? 0 : 50);
         if (tag == button.Group.tag)
         {
-          _pathContainer.style.display = 
-            button.Group.packSeparately
+          _currentGroup = button.Group;
+          _pathContainer.style.display =
+            button.Group.serializationRule.PackSeparately
               ? DisplayStyle.Flex
               : DisplayStyle.None;
         }
       }
+
       _spreadSheetSo.SerializationGroupTag = tag;
+      LoadMeta();
     }
-      
+
     private void SetView(VisualElement visualElement)
     {
       _containerObject = visualElement.Q<ObjectField>("ContainerObject");
@@ -78,17 +84,16 @@ namespace Redpenguin.GoogleSheets.Scripts.Editor.Core
 
     private void SaveMeta(ChangeEvent<string> evt)
     {
-      var metaData = _googleSheetMetaData.Get(_spreadSheetSo.GetType().Name);
+      var metaData = _currentGroup.serializationRule.GoogleSheetSerializeConfig.Get(_spreadSheetSo.SheetDataTypeName);
       metaData.fileName = _fileName.value;
       metaData.savePath = _savePath.value;
     }
+
     private void LoadMeta()
     {
-      var metaData = _googleSheetMetaData.Get(_spreadSheetSo.GetType().Name);
-      if(metaData.fileName != string.Empty)
-        _fileName.value = metaData.fileName;
-      if(metaData.savePath != string.Empty)
-        _savePath.value = metaData.savePath;
+      var metaData = _currentGroup.serializationRule.GoogleSheetSerializeConfig.Get(_spreadSheetSo.SheetDataTypeName);
+      _fileName.value = metaData.fileName;
+      _savePath.value = metaData.savePath;
     }
   }
 }

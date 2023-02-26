@@ -1,0 +1,27 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e15d2666c7c008949986a7c23ae54386, type: 3}
+  m_Name: SerializationRule
+  m_EditorClassIdentifier: 
+  serializationRule:
+    packSeparately: 1
+    filePath: Resources
+    fileName: SpreadSheetDatabase
+    extension: json
+    googleSheetSerializeConfig:
+      sheetContainerSerializeConfigs:
+      - containerType: ExampleDataSheetDatabaseScriptableObject
+        savePath: 123213
+        fileName: 213213
+      - containerType: ExampleData2SheetDatabaseScriptableObject
+        savePath: 123213
+        fileName: 4566

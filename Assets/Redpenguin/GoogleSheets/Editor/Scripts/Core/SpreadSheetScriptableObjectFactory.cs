@@ -48,6 +48,7 @@ namespace Redpenguin.GoogleSheets.Scripts.Editor.Core
 
     public void CreatConfigDatabase(Type type)
     {
+      return;
       var asset = ScriptableObject.CreateInstance(type);
       AssetDatabase.CreateAsset(asset, $"{ConfigSavePath}/ConfigDatabase.asset");
       EditorUtility.SetDirty(asset);

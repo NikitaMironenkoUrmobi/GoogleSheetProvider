@@ -15,6 +15,9 @@ namespace Redpenguin.GoogleSheets.Scripts.Runtime.Core
     public string serializationGroupTag = "Default";
     public override string JsonSerialized => JsonConvert.SerializeObject(SheetDataContainer);
     public override ISheetDataContainer SheetDataContainer => new SpreadSheetDataContainer<T>(data);
+
+    public override string SheetDataTypeName => typeof(T).Name;
+
     public string Type => GetType().ToString();
     public List<T> data = new();
     public List<string> serializationRulesTag = new();
@@ -32,19 +35,5 @@ namespace Redpenguin.GoogleSheets.Scripts.Runtime.Core
         data.Add(new T());
       }
     }
-
-    [ContextMenuItem("Serialize", "Serialize")]
-    public bool t;
-    public void Serialize()
-    {
-      var config = new SpreadSheetsDatabase();
-      
-      JsonConverter[] converters = { new SpreadSheetsConverter()};
-      config.AddContainer(SheetDataContainer);
-      var t2 = JsonConvert.SerializeObject(config);
-      var config2= JsonConvert.DeserializeObject<SpreadSheetsDatabase>(t2, new JsonSerializerSettings() { Converters = converters });
-      Debug.Log(t2);
-    }
-    
   }
 }

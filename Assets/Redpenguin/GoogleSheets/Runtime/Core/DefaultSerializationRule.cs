@@ -14,6 +14,7 @@ namespace Redpenguin.GoogleSheets.Runtime.Core
       filePath = "Resources";
       fileName = "SpreadSheetDatabase";
       extension = "json";
+      packSeparately = false;
     }
     public override void Serialization(object objectToWrite)
     {
@@ -25,11 +26,9 @@ namespace Redpenguin.GoogleSheets.Runtime.Core
       }
 
       var path = Path.Combine(fpath, fname);
-      using (StreamWriter file = File.CreateText(path))
-      {
-        JsonSerializer serializer = new JsonSerializer();
-        serializer.Serialize(file, objectToWrite);
-      }
+      using var file = File.CreateText(path);
+      var serializer = new JsonSerializer();
+      serializer.Serialize(file, objectToWrite);
     }
 
     public override T Deserialization<T>(string text)

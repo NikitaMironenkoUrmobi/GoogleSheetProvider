@@ -5,8 +5,9 @@ namespace Redpenguin.GoogleSheets.Scripts.Runtime.Core
   public interface ISpreadSheetSO
   {
     public string SerializationGroupTag { get; set; }
-    string JsonSerialized { get; }
-    ISheetDataContainer SheetDataContainer { get; }
-    void SetListCount(int count);
+    public string JsonSerialized { get; }
+    public ISheetDataContainer SheetDataContainer { get; }
+    public string SheetDataTypeName { get; }
+    public void SetListCount(int count);
   }
 }

@@ -78,6 +78,7 @@ namespace Redpenguin.GoogleSheets.Scripts.Editor.Core
     private void CreateConfigDatabase()
     {
       if (!SpreadSheetContainers.Any() || SpreadSheetContainers.Contains(null)) return;
+      return;
       if (_configDatabase == null)
       {
         var configDatabases = AssetDatabaseHelper.FindAssetsByType<ConfigDatabaseScriptableObject>();
@@ -112,6 +113,44 @@ namespace Redpenguin.GoogleSheets.Scripts.Editor.Core
     {
       _scriptObjFactory.CreateScriptableObjects(_codeFactory.GetGeneratedScriptsTypes());
     }
+
+    public void SaveAllGroups()
+    {
+      
+      foreach (var settingsSerializationGroup in Settings.SerializationGroups)
+      {
+        if (settingsSerializationGroup.serializationRule == null)
+        {
+          Debug.LogError($"SerializationRule for {Settings.currentGroup.tag} Group doesn't exist.");
+          continue;
+        }
+        
+        var rule = settingsSerializationGroup.serializationRule;
+        if (rule.PackSeparately)
+        {
+          foreach (var spreadSheetContainer in SpreadSheetContainers)
+          {
+            var sr = (spreadSheetContainer as ISpreadSheetSO);
+            if(sr.SerializationGroupTag == settingsSerializationGroup.tag)
+              rule.Serialization(sr);
+          }
+        }
+        else
+        {
+          var container = new SpreadSheetsDatabase();
+          foreach (var spreadSheetContainer in SpreadSheetContainers)
+          {
+            var sr = (spreadSheetContainer as ISpreadSheetSO);
+            if(sr.SerializationGroupTag == settingsSerializationGroup.tag)
+             container.AddContainer(sr.SheetDataContainer);
+          }
+          rule.Serialization(container);
+          Debug.Log($"{rule.FileName} save to file!");
+        }
+      }
+      
+      AssetDatabase.Refresh();
+    }
     public void SaveToFile()
     {
       //((ISpreadSheetSave) _configDatabase).SaveToFile();
@@ -129,8 +168,22 @@ namespace Redpenguin.GoogleSheets.Scripts.Editor.Core
         return;
       }
       var rule = Settings.currentGroup.serializationRule;
-      rule.Serialization(container);
-      Debug.Log($"{rule.FileName} save to file!");
+      if (rule.PackSeparately)
+      {
+        foreach (var spreadSheetContainer in SpreadSheetContainers)
+        {
+          var sr = (spreadSheetContainer as ISpreadSheetSO);
+          if(sr.SerializationGroupTag == Settings.currentGroup.tag)
+            rule.Serialization(sr);
+        }
+      }
+      else
+      {
+        rule.Serialization(container);
+        Debug.Log($"{rule.FileName} save to file!");
+      }
+      
+      
       AssetDatabase.Refresh();
     }
 

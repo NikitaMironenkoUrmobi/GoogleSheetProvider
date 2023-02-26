@@ -81,6 +81,7 @@ namespace Redpenguin.GoogleSheets.Scripts.Editor.Core
       rootVisualElement.Q<Button>("ButtonClear").clickable.clicked += _googleSheetsProviderService.Clear;
       rootVisualElement.Q<Button>("ButtonLoad").clickable.clicked += _googleSheetsProviderService.LoadSheetsData;
       rootVisualElement.Q<Button>("ButtonSave").clickable.clicked += _googleSheetsProviderService.SaveToFile;
+      rootVisualElement.Q<Button>("ButtonAllSave").clickable.clicked += _googleSheetsProviderService.SaveAllGroups;
       rootVisualElement.Q<Button>("ButtonSettings").clickable.clicked += GoogleSheetsProviderAssetMenu.SelectSettingsAsset;
     }
 
@@ -90,8 +91,7 @@ namespace Redpenguin.GoogleSheets.Scripts.Editor.Core
       var containerSheetModel = new SheetEditorPresenter(
         view, 
         _googleSheetsProviderService.SpreadSheetContainers[i],  
-        _googleSheetsProviderService.Settings.SerializationGroups, 
-        _googleSheetsProviderService.Settings.googleSheetMetaData
+        _googleSheetsProviderService.Settings.SerializationGroups
         );
       view.userData = containerSheetModel;
       folder.Add(view);

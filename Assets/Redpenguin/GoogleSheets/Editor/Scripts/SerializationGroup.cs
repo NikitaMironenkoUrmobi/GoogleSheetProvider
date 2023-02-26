@@ -9,7 +9,6 @@ namespace Redpenguin.GoogleSheets.Editor
   {
     public string tag;
     public Color color;
-    public bool packSeparately;
     public SerializationRuleSoWrapper serializationRule;
   }
 }
