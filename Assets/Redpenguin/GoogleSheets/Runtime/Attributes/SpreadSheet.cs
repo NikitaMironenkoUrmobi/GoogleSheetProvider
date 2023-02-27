@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 
-namespace Redpenguin.GoogleSheets.Scripts.Runtime.Attributes
+namespace Redpenguin.GoogleSheets.Attributes
 {
   [AttributeUsage(AttributeTargets.Class)]
   public class SpreadSheet : Attribute

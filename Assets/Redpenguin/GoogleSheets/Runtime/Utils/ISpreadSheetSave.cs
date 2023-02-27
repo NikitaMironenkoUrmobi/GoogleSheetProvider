@@ -1,4 +1,4 @@
-﻿namespace Redpenguin.GoogleSheets.Scripts.Editor.Utils
+﻿namespace Redpenguin.GoogleSheets
 {
   public interface ISpreadSheetSave
   {

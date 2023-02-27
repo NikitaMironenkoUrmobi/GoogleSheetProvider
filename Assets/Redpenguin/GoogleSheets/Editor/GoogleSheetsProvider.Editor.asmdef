@@ -2,7 +2,7 @@
     "name": "GoogleSheetsProvider.Editor",
     "rootNamespace": "",
     "references": [
-        "GUID:7eb3eed3dbc89c84085418e7bd7a5b03"
+        "GUID:871a86c52494100418f6a0048c2c47a6"
     ],
     "includePlatforms": [
         "Editor"

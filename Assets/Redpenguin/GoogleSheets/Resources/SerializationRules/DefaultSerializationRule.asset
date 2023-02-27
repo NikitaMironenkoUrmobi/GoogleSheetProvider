@@ -9,7 +9,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e15d2666c7c008949986a7c23ae54386, type: 3}
+  m_Script: {fileID: 11500000, guid: 446b4a63a6c943368adb9cd9e9cd7deb, type: 3}
   m_Name: DefaultSerializationRule
   m_EditorClassIdentifier: 
   serializationRule:
@@ -21,7 +21,5 @@ MonoBehaviour:
       sheetContainerSerializeConfigs:
       - containerType: ExampleData
         savePath: 
-        fileName: 
-      - containerType: ExampleData2
-        savePath: 
+        loadPath: 
         fileName: 

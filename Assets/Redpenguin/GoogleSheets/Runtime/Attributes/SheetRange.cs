@@ -1,11 +1,11 @@
 ﻿using System;
 
-namespace Redpenguin.GoogleSheets.Scripts.Runtime.Attributes
+namespace Redpenguin.GoogleSheets.Attributes
 {
   [AttributeUsage(AttributeTargets.Class)]
   public class SheetRange : Attribute
   {
-    public string SpreadSheetRange;
+    public readonly string SpreadSheetRange;
 
     public SheetRange(string spreadSheetRange)
     {

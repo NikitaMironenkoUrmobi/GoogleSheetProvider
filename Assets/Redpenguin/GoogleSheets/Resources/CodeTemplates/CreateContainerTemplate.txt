@@ -1,4 +1,0 @@
-﻿[Serializable]
-  public class %SERIALIZE_CLASS%Container : SheetDataContainer<%SERIALIZE_CLASS%> { }
-  
-  

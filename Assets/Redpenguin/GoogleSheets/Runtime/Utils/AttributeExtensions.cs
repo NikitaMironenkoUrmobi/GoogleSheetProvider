@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 
-namespace Redpenguin.GoogleSheets.Scripts.Runtime.Utils
+namespace Redpenguin.GoogleSheets
 {
   public static class AttributeExtensions
   {

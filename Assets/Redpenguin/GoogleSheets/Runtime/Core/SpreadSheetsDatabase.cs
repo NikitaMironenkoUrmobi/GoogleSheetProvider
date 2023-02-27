@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using Redpenguin.GoogleSheets.Scripts.Runtime.Attributes;
-using Redpenguin.GoogleSheets.Scripts.Runtime.Core;
+using Redpenguin.GoogleSheets.Attributes;
 
-namespace Redpenguin.GoogleSheets.Runtime.Core
+namespace Redpenguin.GoogleSheets.Core
 {
   [Serializable]
   public class SpreadSheetsDatabase
@@ -21,16 +20,16 @@ namespace Redpenguin.GoogleSheets.Runtime.Core
       throw new ArgumentNullException();
     }
 
-    public List<T> GetSpreadSheetData<T>() where T : ISheetData, new()
+    public List<T> GetSpreadSheetData<T>() where T : ISheetData
     {
       foreach (var container in Containers.OfType<SpreadSheetDataContainer<T>>())
       {
         return container.Data;
       }
 
-      throw new ArgumentNullException();
+      throw new Exception($"SpreadSheetsDatabase doesn't have container with data of {typeof(T)} type");
     }
-    public void SetData<T>(List<T> list) where T : ISheetData, new()
+    public void SetData<T>(List<T> list) where T : ISheetData
     {
       foreach (var container in Containers.OfType<SpreadSheetDataContainer<T>>())
       {

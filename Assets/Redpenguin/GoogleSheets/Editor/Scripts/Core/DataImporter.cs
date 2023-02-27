@@ -4,14 +4,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using Newtonsoft.Json;
+using Redpenguin.GoogleSheets.Attributes;
+using Redpenguin.GoogleSheets.Core;
 using Redpenguin.GoogleSheets.Editor.Utils;
-using Redpenguin.GoogleSheets.Scripts.Runtime.Attributes;
-using Redpenguin.GoogleSheets.Scripts.Runtime.Core;
-using Redpenguin.GoogleSheets.Scripts.Runtime.Utils;
 using UnityEditor;
 using UnityEngine;
 
-namespace Redpenguin.GoogleSheets.Scripts.Editor.Core
+namespace Redpenguin.GoogleSheets.Editor.Core
 {
   public class DataImporter
   {
@@ -23,13 +22,11 @@ namespace Redpenguin.GoogleSheets.Scripts.Editor.Core
       _sheetsReader = sheetsReader;
     }
 
-    public void LoadAndLinkSheetsDataToSo(List<ScriptableObject> list)
+    public void LoadAndLinkSheetsDataToSo(List<ScriptableObject> databaseScriptObj)
     {
-      //var databaseScriptObj = AssetDatabaseHelper.FindAssetsByType<SpreadSheetWrapper>();
-      var databaseScriptObj = list;
-      Debug.Log($"Count {databaseScriptObj.Count}");
       foreach (var database in databaseScriptObj)
       {
+        if((database as ISpreadSheetSO).IsLoad == false) continue;
         var databaseType = database.GetType();
         var sheetValues = GetSheetValues(databaseType);
         var dataList = databaseType.GetFields().FirstOrDefault(x => (x.GetValue(database) is IList));
@@ -38,6 +35,8 @@ namespace Redpenguin.GoogleSheets.Scripts.Editor.Core
         SetValues(dataList.GetValue(database) as IList, database, sheetValues);
         EditorUtility.SetDirty(database);
       }
+
+      Debug.Log($"Load data from Google Sheets was completed!".WithColor(ColorExt.CompletedColor));
     }
 
     private void SetValues(IList dataList, ScriptableObject database,

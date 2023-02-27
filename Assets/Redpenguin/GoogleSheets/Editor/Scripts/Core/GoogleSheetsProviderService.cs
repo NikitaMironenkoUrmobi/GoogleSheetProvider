@@ -2,17 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Redpenguin.GoogleSheets.Editor;
+using Redpenguin.GoogleSheets.Core;
+using Redpenguin.GoogleSheets.Editor.Factories;
 using Redpenguin.GoogleSheets.Editor.Utils;
-using Redpenguin.GoogleSheets.Runtime.Core;
-using Redpenguin.GoogleSheets.Scripts.Editor.Utils;
-using Redpenguin.GoogleSheets.Scripts.Runtime.Core;
-using Redpenguin.GoogleSheets.Scripts.Runtime.Examples;
-using Redpenguin.GoogleSheets.Scripts.Runtime.Utils;
+using Redpenguin.GoogleSheets.Settings;
 using UnityEditor;
 using UnityEngine;
 
-namespace Redpenguin.GoogleSheets.Scripts.Editor.Core
+namespace Redpenguin.GoogleSheets.Editor.Core
 {
   public class GoogleSheetsProviderService : IDisposable
   {
@@ -23,16 +20,38 @@ namespace Redpenguin.GoogleSheets.Scripts.Editor.Core
     private readonly SpreadSheetCodeFactory _codeFactory = new();
     private readonly SpreadSheetScriptableObjectFactory _scriptObjFactory = new();
     
-    private ConfigDatabaseScriptableObject _configDatabase;
     private readonly GoogleSheetsReader _googleSheetsReader;
 
     public GoogleSheetsProviderService()
     {
       if (SetupSettings()) return;
-
+      if (!IsSettingsSetup())
+      {
+        return;
+      }
       _googleSheetsReader = new GoogleSheetsReader(Settings.googleSheetID, Settings.credential.text);
       _dataImporter = new DataImporter(_googleSheetsReader);
     }
+
+    public bool IsSettingsSetup()
+    {
+      return IsGoogleSheetIdSetup() && IsCredentialSetup();
+    }
+
+    public bool IsGoogleSheetIdSetup()
+    {
+      return Settings.googleSheetID != "";
+    }
+    public bool IsCredentialSetup()
+    {
+      return Settings.credential != null && Settings.credential.text != "";
+    }
+
+    public string CantFindClassWithAttribute()
+    {
+      return _codeFactory.CantFindClass();
+    }
+    
 
     public void FindAllContainers()
     {
@@ -41,8 +60,6 @@ namespace Redpenguin.GoogleSheets.Scripts.Editor.Core
       AssetDatabaseHelper
         .FindAssetsByType<SpreadSheetSoWrapper>()
         .ForEach(x => SpreadSheetContainers.Add(x));
-      
-      CreateConfigDatabase();
     }
 
     private bool SetupSettings()
@@ -75,43 +92,30 @@ namespace Redpenguin.GoogleSheets.Scripts.Editor.Core
         file.Delete();
       }
     }
-    private void CreateConfigDatabase()
-    {
-      if (!SpreadSheetContainers.Any() || SpreadSheetContainers.Contains(null)) return;
-      return;
-      if (_configDatabase == null)
-      {
-        var configDatabases = AssetDatabaseHelper.FindAssetsByType<ConfigDatabaseScriptableObject>();
-        if (configDatabases.Count == 0)
-        {
-          _scriptObjFactory.CreatConfigDatabase(_codeFactory.GetConfigDatabaseType());
-          _configDatabase = AssetDatabaseHelper.FindAssetsByType<ConfigDatabaseScriptableObject>()[0];
-        }
-        else
-        {
-          _configDatabase = configDatabases[0];
-        }
-      }
-
-      _configDatabase.AddContainers(SpreadSheetContainers);
-      EditorUtility.SetDirty(_configDatabase);
-    }
     public void LoadSheetsData()
     {
       _dataImporter.LoadAndLinkSheetsDataToSo(SpreadSheetContainers);
-      CreateConfigDatabase();
-      SaveToFile();
+      //SaveToFile();
     }
+
     
-    public bool CreateAdditionalScripts()
+    public void CreateAdditionalScripts(Action<bool> isCreatedCallback)
     {
       _scriptObjFactory.DeleteAllAssets();
-      return _codeFactory.CreateAdditionalScripts();
+      _codeFactory.DeleteAllScripts();
+      var isCreated =  _codeFactory.CreateAdditionalScripts();
+      isCreatedCallback.Invoke(isCreated);
     }
 
     public void CreateScriptableObjects()
     {
       _scriptObjFactory.CreateScriptableObjects(_codeFactory.GetGeneratedScriptsTypes());
+      FindAllContainers();
+    }
+
+    public bool CanCreateContainers()
+    {
+      return _codeFactory.GetClassWithSpreadSheetAttribute().Count != SpreadSheetContainers.Count;
     }
 
     public void SaveAllGroups()
@@ -180,7 +184,7 @@ namespace Redpenguin.GoogleSheets.Scripts.Editor.Core
       else
       {
         rule.Serialization(container);
-        Debug.Log($"{rule.FileName} save to file!");
+        Debug.Log($"{rule.FileName} save to file!".WithColor(ColorExt.CompletedColor));
       }
       
       
@@ -189,7 +193,8 @@ namespace Redpenguin.GoogleSheets.Scripts.Editor.Core
 
     public void Dispose()
     {
-      _googleSheetsReader.Dispose();
+      
+      _googleSheetsReader?.Dispose();
     }
   }
 }

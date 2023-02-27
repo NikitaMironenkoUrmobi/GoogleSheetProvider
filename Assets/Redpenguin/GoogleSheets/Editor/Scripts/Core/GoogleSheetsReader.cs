@@ -8,7 +8,7 @@ using Google.Apis.Sheets.v4;
 using UnityEditor;
 using UnityEngine;
 
-namespace Redpenguin.GoogleSheets.Scripts.Editor.Core
+namespace Redpenguin.GoogleSheets.Editor.Core
 {
   public class GoogleSheetsReader : IDisposable
 
@@ -48,8 +48,7 @@ namespace Redpenguin.GoogleSheets.Scripts.Editor.Core
           sb.Append(val);
           sb.Append(" ");
         }
-
-        Debug.Log(sb.ToString());
+        //Debug.Log(sb.ToString());
         sb.Clear();
       }
     }
