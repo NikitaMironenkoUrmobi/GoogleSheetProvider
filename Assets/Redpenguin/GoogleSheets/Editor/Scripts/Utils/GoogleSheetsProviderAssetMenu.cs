@@ -1,21 +1,14 @@
 using System.Linq;
-using Redpenguin.GoogleSheets.Editor.Utils;
 using Redpenguin.GoogleSheets.Settings;
 using UnityEditor;
 using UnityEngine;
 
-namespace Redpenguin.GoogleSheets.Editor
+namespace Redpenguin.GoogleSheets.Editor.Utils
 {
   public static class GoogleSheetsProviderAssetMenu
   {
-
-    [MenuItem("GoogleSheets/Settings", false, 3)]
-    public static void SelectSettings()
-    {
-      SelectSettingsAsset();
-    }
-
-    public static void SelectSettingsAsset()
+    
+    private static void SelectSettingsAsset()
     {
       var providerSettingsList = AssetDatabaseHelper.FindAssetsByType<GoogleSheetProviderSettings>();
       if (providerSettingsList.Count > 1)

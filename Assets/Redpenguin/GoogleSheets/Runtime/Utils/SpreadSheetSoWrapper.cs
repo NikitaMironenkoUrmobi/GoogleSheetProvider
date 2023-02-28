@@ -1,3 +1,4 @@
+using System;
 using Redpenguin.GoogleSheets.Core;
 using UnityEngine;
 
@@ -9,7 +10,7 @@ namespace Redpenguin.GoogleSheets
     public abstract bool IsLoad { get; set; }
     public abstract string JsonSerialized { get; }
     public abstract ISheetDataContainer SheetDataContainer { get; }
-    public abstract string SheetDataTypeName { get; }
+    public abstract Type SheetDataType { get; }
     public abstract void SetListCount(int count);
   }
 }

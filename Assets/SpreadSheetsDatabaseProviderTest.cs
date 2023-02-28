@@ -10,7 +10,7 @@ public class SpreadSheetsDatabaseProviderTest : MonoBehaviour
     void Start()
     {
         var provider = new SpreadSheetsDatabaseProvider();
-        provider.Load();
+        provider.Load("");
         Debug.Log(provider.Database.GetSpreadSheetData<ExampleData>()[0].myString);;
     }
 

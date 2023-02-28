@@ -5,13 +5,14 @@ using System.Text;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
+using Newtonsoft.Json;
+using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
 
 namespace Redpenguin.GoogleSheets.Editor.Core
 {
   public class GoogleSheetsReader : IDisposable
-
   {
     private static readonly string[] Scopes = {SheetsService.Scope.Spreadsheets};
     private static readonly string ApplicationName = PlayerSettings.productName;
@@ -38,6 +39,19 @@ namespace Redpenguin.GoogleSheets.Editor.Core
       return values.ToDictionary(k => k.First().ToString(), list => list.ToList().GetRange(1, list.Count - 1));
     }
 
+    public TableModel GetTableModel()
+    {
+      var request = _service.Spreadsheets.Get(_spreadsheetId);
+      request.IncludeGridData = false;
+      var spreadsheet = request.Execute();
+      return new TableModel
+      {
+        SheetNames = spreadsheet.Sheets.Select(x => x.Properties.Title).ToList()
+      };
+    }
+    
+    
+
     private void DebugLog(IEnumerable<IList<object>> values)
     {
       var sb = new StringBuilder();
@@ -57,5 +71,10 @@ namespace Redpenguin.GoogleSheets.Editor.Core
     {
       _service.Dispose();
     }
+  }
+  
+  public struct TableModel
+  {
+    public List<string> SheetNames;
   }
 }

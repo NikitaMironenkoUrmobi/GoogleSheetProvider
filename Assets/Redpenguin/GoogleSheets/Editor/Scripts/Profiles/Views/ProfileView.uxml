@@ -1,0 +1,18 @@
+<ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="True">
+    <ui:GroupBox style="padding-top: 5px; padding-bottom: 5px; padding-left: 5px; margin-left: 2px; margin-top: 3px; background-color: rgba(0, 0, 0, 0.2); padding-right: 5px;">
+        <ui:VisualElement style="flex-direction: row; justify-content: space-around; padding-top: 2px; padding-bottom: 2px;">
+            <ui:Label text="Label" display-tooltip-when-elided="true" name="ProfileLabel" />
+        </ui:VisualElement>
+        <ui:VisualElement style="flex-direction: row; justify-content: space-between;">
+            <ui:TextField picking-mode="Ignore" text="Profile Name" name="ProfileName" style="width: 80%;" />
+            <uie:ColorField value="RGBA(0.000, 1.000, 1.000, 1.000)" name="ProfileColor" style="width: 15%;" />
+        </ui:VisualElement>
+        <ui:TextField picking-mode="Ignore" text="Table ID" name="TableID" />
+        <uie:ObjectField type="UnityEngine.TextAsset,UnityEngine.CoreModule" name="Credential" style="justify-content: space-around;" />
+        <ui:VisualElement style="flex-direction: row; justify-content: space-around; margin-left: 3px; margin-right: 3px;">
+            <ui:TextField picking-mode="Ignore" text="Save Path" name="SavePath" style="width: 60%;" />
+            <ui:TextField picking-mode="Ignore" text="File Name" name="FileName" style="width: 40%;" />
+        </ui:VisualElement>
+        <ui:DropdownField label="Serialization Rule" index="-1" choices="System.Collections.Generic.List`1[System.String]" name="SerializationRule" />
+    </ui:GroupBox>
+</ui:UXML>

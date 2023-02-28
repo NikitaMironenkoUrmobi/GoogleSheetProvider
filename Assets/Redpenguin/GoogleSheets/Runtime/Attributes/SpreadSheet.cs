@@ -5,13 +5,18 @@ namespace Redpenguin.GoogleSheets.Attributes
   [AttributeUsage(AttributeTargets.Class)]
   public class SpreadSheet : Attribute
   {
-    public string Name;
-    public string Range;
+    public string SheetName;
+    public string From;
+    public string To;
+    public string ProfileName;
 
-    public SpreadSheet(string name, string from = "A1", string to = "Z1000")
+    public string Range => $"{SheetName}!{From}:{To}";
+    public SpreadSheet(string sheetName, string from = "A1", string to = "Z1000", string profileName = "")
     {
-      Name = name;
-      Range = $"{Name}!{from}:{to}";
+      ProfileName = profileName;
+      SheetName = sheetName;
+      From = from;
+      To = to;
     }
   }
 }

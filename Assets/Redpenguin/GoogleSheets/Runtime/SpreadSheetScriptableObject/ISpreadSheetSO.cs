@@ -1,4 +1,5 @@
-﻿using Redpenguin.GoogleSheets.Core;
+﻿using System;
+using Redpenguin.GoogleSheets.Core;
 
 namespace Redpenguin.GoogleSheets
 {
@@ -8,7 +9,7 @@ namespace Redpenguin.GoogleSheets
     public bool IsLoad { get; set; }
     public string JsonSerialized { get; }
     public ISheetDataContainer SheetDataContainer { get; }
-    public string SheetDataTypeName { get; }
+    public Type SheetDataType { get; }
     public void SetListCount(int count);
   }
 }

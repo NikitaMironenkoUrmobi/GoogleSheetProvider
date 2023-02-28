@@ -26,9 +26,10 @@ namespace Redpenguin.GoogleSheets.Editor.Core
     {
       foreach (var database in databaseScriptObj)
       {
-        if((database as ISpreadSheetSO).IsLoad == false) continue;
+        var databaseSO = (database as ISpreadSheetSO);
+        if(databaseSO.IsLoad == false) continue;
         var databaseType = database.GetType();
-        var sheetValues = GetSheetValues(databaseType);
+        var sheetValues = GetSheetValues(databaseSO.SheetDataType);
         var dataList = databaseType.GetFields().FirstOrDefault(x => (x.GetValue(database) is IList));
         if(dataList == null) return;
         ((ISpreadSheetSO) database).SetListCount(sheetValues.First().Value.Count);
@@ -115,7 +116,7 @@ namespace Redpenguin.GoogleSheets.Editor.Core
 
     private Dictionary<string, List<object>> GetSheetValues(Type databaseType)
     {
-      var spreadSheetRange = databaseType.GetAttributeValue((SheetRange st) => st.SpreadSheetRange);
+      var spreadSheetRange = databaseType.GetAttributeValue((SpreadSheet st) => st.Range);
       return _sheetsReader.GetValuesOnRange(spreadSheetRange);
     }
 

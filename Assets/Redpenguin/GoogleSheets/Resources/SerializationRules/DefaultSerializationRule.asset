@@ -23,3 +23,7 @@ MonoBehaviour:
         savePath: 
         loadPath: 
         fileName: 
+      - containerType: Redpenguin.GoogleSheets.Examples.ExampleData
+        savePath: 
+        loadPath: 
+        fileName: 

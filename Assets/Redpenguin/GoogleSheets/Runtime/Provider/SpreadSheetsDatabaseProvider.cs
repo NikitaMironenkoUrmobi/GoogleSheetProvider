@@ -9,10 +9,10 @@ namespace Redpenguin.GoogleSheets.Provider
   {
     public SpreadSheetsDatabase Database { get; private set; }
 
-    public virtual void Load()
+    public virtual void Load(string fileNameInput)
     {
-      var serialization = Resources.Load<DefaultSerializationRuleScriptableObject>("SerializationRules/DefaultSerializationRule").serializationRule;
-      var fileName = serialization.fileName;
+      var serialization = new JsonSerializationRule();
+      var fileName = fileNameInput;
       var fileTemplate = Resources.Load<TextAsset>($"{fileName}");
       if (fileTemplate != null)
       {

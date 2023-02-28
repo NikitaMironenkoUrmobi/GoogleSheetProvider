@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Newtonsoft.Json;
 using Redpenguin.GoogleSheets.Attributes;
 using Redpenguin.GoogleSheets.Core;
@@ -12,7 +13,7 @@ namespace Redpenguin.GoogleSheets
     public override string JsonSerialized => JsonConvert.SerializeObject(SheetDataContainer);
     public override ISheetDataContainer SheetDataContainer => new SpreadSheetDataContainer<T>(data);
 
-    public override string SheetDataTypeName => typeof(T).Name;
+    public override Type SheetDataType => typeof(T);
     public bool isLoad;
 
     public override bool IsLoad
