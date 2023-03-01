@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using Redpenguin.GoogleSheets.Editor.Core;
 using Redpenguin.GoogleSheets.Editor.Models;
@@ -9,9 +10,12 @@ namespace Redpenguin.GoogleSheets.Editor.Provider.Presenters
 {
   public class GoogleSheetsProviderPresenter
   {
-    private VisualTreeAsset _tableContainerView;
-    private GoogleSheetsProviderService _googleSheetsProviderService;
+    private readonly VisualTreeAsset _tableContainerView;
+    private readonly GoogleSheetsProviderService _googleSheetsProviderService;
     private readonly ProfilesContainer _profilesContainer;
+    private readonly List<VisualElement> _containers = new();
+    private VisualElement _view;
+    private VisualElement _folder;
 
     public GoogleSheetsProviderPresenter(VisualTreeAsset tableContainerView, GoogleSheetsProviderService googleSheetsProviderService)
     {
@@ -22,23 +26,43 @@ namespace Redpenguin.GoogleSheets.Editor.Provider.Presenters
 
     public void ModelViewLink(VisualElement view)
     {
+      _view = view;
       DropdownGroupsSetup(view);
-      var folder = view.Q<VisualElement>("Containers");
-      for (var i = 0; i < _googleSheetsProviderService.SpreadSheetContainers.Count; i++)
+      SetupContainers(view);
+    }
+
+    private void RecreateContainers()
+    {
+      foreach (var visualElement in _containers)
       {
-        CreateGroupButton(i, folder);
+        _folder.Remove(visualElement);
+      }
+      SetupContainers(_view);
+    }
+
+    private void SetupContainers(VisualElement view)
+    {
+      _containers.Clear();
+      _folder = view.Q<VisualElement>("Containers");
+      for (var i = 0; i < _googleSheetsProviderService.SpreadSheetDataTypes.Count; i++)
+      {
+        CreateGroupButton(i, _folder);
       }
     }
-    
+
     private void CreateGroupButton(int i, VisualElement folder)
     {
       var view = _tableContainerView.Instantiate();
-      var containerSheetModel = new SheetEditorPresenter(
+      var dataType = _googleSheetsProviderService.SpreadSheetDataTypes[i];
+      var containerSheetModel = new SheetContainerPresenter(
         view,
-        _googleSheetsProviderService.SpreadSheetContainers[i],
-        _googleSheetsProviderService.Settings
+        _googleSheetsProviderService.SpreadSheetDataTypes[i],
+        _profilesContainer,
+        _googleSheetsProviderService.SpreadSheetSoList.Find(x => x.SheetDataType == dataType),
+        _googleSheetsProviderService.SerializeContainer
       );
       view.userData = containerSheetModel;
+      _containers.Add(view);
       folder.Add(view);
     }
     
@@ -51,7 +75,10 @@ namespace Redpenguin.GoogleSheets.Editor.Provider.Presenters
       dropdownField.Q(className: "unity-base-popup-field__text").style.backgroundColor =
         _profilesContainer.CurrentProfile.color;
       
-      dropdownField.RegisterValueChangedCallback(x => OnChangeDropdownValue(dropdownField));
+      dropdownField.RegisterValueChangedCallback(x =>
+      {
+        OnChangeDropdownValue(dropdownField);
+      });
       EditorUtility.SetDirty(_profilesContainer);
     }
 
@@ -60,6 +87,9 @@ namespace Redpenguin.GoogleSheets.Editor.Provider.Presenters
       _profilesContainer.SetCurrentProfile(_profilesContainer.profileModels[dropdownField.index]);
       dropdownField.Q(className: "unity-base-popup-field__text").style.backgroundColor =
         _profilesContainer.CurrentProfile.color;
+      
+      _googleSheetsProviderService.OnProfileChange();
+      RecreateContainers();
       EditorUtility.SetDirty(_profilesContainer);
     }
     

@@ -14,8 +14,13 @@
     </ui:VisualElement>
     <ui:VisualElement name="Buttons" style="margin-top: 10px;">
         <ui:Button text="Create containers" display-tooltip-when-elided="true" name="ButtonCreateSO" />
-        <ui:Button text="Save to file" display-tooltip-when-elided="true" name="ButtonSave" />
-        <ui:VisualElement style="margin-top: 10px; margin-bottom: 10px;" />
+        <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); flex-direction: row;">
+            <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); width: 50%; flex-direction: row; margin-left: 3px;">
+                <ui:Label tabindex="-1" text="From SO containers" display-tooltip-when-elided="true" style="-unity-text-align: middle-left;" />
+                <ui:Toggle />
+            </ui:VisualElement>
+            <ui:Button text="Save to file" display-tooltip-when-elided="true" name="ButtonSave" style="width: 50%;" />
+        </ui:VisualElement>
         <ui:Button text="Clear all saves" display-tooltip-when-elided="true" name="ButtonClear" />
     </ui:VisualElement>
 </ui:UXML>

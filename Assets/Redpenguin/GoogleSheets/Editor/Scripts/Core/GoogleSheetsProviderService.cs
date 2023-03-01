@@ -2,12 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
+using Redpenguin.GoogleSheets.Attributes;
 using Redpenguin.GoogleSheets.Core;
 using Redpenguin.GoogleSheets.Editor.Factories;
 using Redpenguin.GoogleSheets.Editor.Models;
 using Redpenguin.GoogleSheets.Editor.Utils;
 using Redpenguin.GoogleSheets.Settings;
-using Redpenguin.GoogleSheets.Settings.SerializationRules;
 using UnityEditor;
 using UnityEngine;
 
@@ -15,21 +16,24 @@ namespace Redpenguin.GoogleSheets.Editor.Core
 {
   public class GoogleSheetsProviderService : IDisposable
   {
-    public List<ScriptableObject> SpreadSheetContainers { get; private set; } = new();
-    public GoogleSheetProviderSettings Settings { get; set; }
-
+    public List<Type> SpreadSheetDataTypes { get; private set; } = new();
 
     private readonly SpreadSheetCodeFactory _codeFactory = new();
     private readonly SpreadSheetScriptableObjectFactory _scriptObjFactory = new();
 
     private DataImporter _dataImporter;
     private GoogleSheetsReader _googleSheetsReader;
-    public TableModel CurrentTableModel { get; private set; }
+    public List<SpreadSheetSoWrapper> SpreadSheetSoList { get; }
     public ProfilesContainer ProfilesContainer { get; }
 
     public GoogleSheetsProviderService()
     {
       ProfilesContainer = AssetDatabaseHelper.FindAssetsByType<ProfilesContainer>()[0];
+
+      var currentProfile = ProfilesContainer.CurrentProfile;
+      _googleSheetsReader = new GoogleSheetsReader(currentProfile.tableID, currentProfile.credential.text);
+      _dataImporter = new DataImporter(_googleSheetsReader);
+      SpreadSheetSoList = AssetDatabaseHelper.FindAssetsByType<SpreadSheetSoWrapper>();
     }
 
 
@@ -38,32 +42,37 @@ namespace Redpenguin.GoogleSheets.Editor.Core
       return _codeFactory.CantFindClass();
     }
 
+    public void OnProfileChange()
+    {
+      var currentProfile = ProfilesContainer.CurrentProfile;
+      _googleSheetsReader = new GoogleSheetsReader(currentProfile.tableID, currentProfile.credential.text);
+      _dataImporter = new DataImporter(_googleSheetsReader);
+      FindAllContainers();
+    }
 
     public void FindAllContainers()
     {
-      SpreadSheetContainers.Clear();
-
-      AssetDatabaseHelper
-        .FindAssetsByType<SpreadSheetSoWrapper>()
-        .ForEach(x => SpreadSheetContainers.Add(x));
+      SpreadSheetDataTypes.Clear();
+      var tableSheets = GetCurrentProfileTableSheetsNames();
+      var types = GetContainersType(tableSheets);
+      types.ForEach(x => SpreadSheetDataTypes.Add(x));
+      // AssetDatabaseHelper
+      //   .FindAssetsByType<SpreadSheetSoWrapper>().Where(x => types.Contains(x.SheetDataType))
+      //   .ToList()
+      //   .ForEach(x => SpreadSheetContainers.Add(x));
     }
 
-    private bool SetupSettings()
+    private List<string> GetCurrentProfileTableSheetsNames()
     {
-      var providerSettingsList = AssetDatabaseHelper.FindAssetsByType<GoogleSheetProviderSettings>();
-      switch (providerSettingsList.Count)
+      var tableSheets = ProfilesContainer.CurrentProfile.metaData.tableSheetsNames;
+      if (tableSheets.Count == 0)
       {
-        case > 1:
-          Debug.LogError($"Find {providerSettingsList.Count} GoogleSheetProviderSettings. Remove all except 1.");
-          break;
-        case 0:
-          Debug.LogError(
-            $"Cant find GoogleSheetProviderSettings. Create via CreateAssetMenu -> Create -> GoogleSheets -> Settings.");
-          return true;
+        _googleSheetsReader.GetTableModel(ProfilesContainer.CurrentProfile.tableID).SheetNames
+          .ForEach(x => tableSheets.Add(x));
+        EditorUtility.SetDirty(ProfilesContainer);
       }
 
-      Settings = providerSettingsList.First();
-      return false;
+      return tableSheets;
     }
 
     public void Clear()
@@ -82,12 +91,29 @@ namespace Redpenguin.GoogleSheets.Editor.Core
     public void LoadSheetsData()
     {
       var currentProfile = ProfilesContainer.CurrentProfile;
-      _googleSheetsReader = new GoogleSheetsReader(currentProfile.tableID, currentProfile.credential.text);
-      CurrentTableModel = _googleSheetsReader.GetTableModel();
+      //_googleSheetsReader = new GoogleSheetsReader(currentProfile.tableID, currentProfile.credential.text);
+      //_dataImporter = new DataImporter(_googleSheetsReader);
+      
+      var tableSheets = GetCurrentProfileTableSheetsNames();
+      var types = GetContainersType(tableSheets);
+      var list = CreateSheetDataContainers(types);
+      if (list.Count == 0)
+      {
+        Debug.LogError(
+          $"Can't find class with SpreadSheet attribute that has SheetName which contains in {currentProfile.profileName} profile table");
+        return;
+      }
 
-      _dataImporter = new DataImporter(_googleSheetsReader);
-      _dataImporter.LoadAndLinkSheetsDataToSo(SpreadSheetContainers);
-      //SaveToFile();
+      //_dataImporter.LoadAndFillDataContainers(SpreadSheetContainers.Select(x => x.SheetDataContainer).ToList());
+      _dataImporter.LoadAndFillDataContainers(list);
+      Serialize(list);
+    }
+
+    public void SerializeContainer(Type containerDataType)
+    {
+      var list = CreateSheetDataContainers(new List<Type>{containerDataType});
+      _dataImporter.LoadAndFillDataContainers(list);
+      Serialize(list);
     }
 
 
@@ -109,100 +135,50 @@ namespace Redpenguin.GoogleSheets.Editor.Core
 
     public bool CanCreateContainers()
     {
-      return _codeFactory.GetClassWithSpreadSheetAttribute().Count != SpreadSheetContainers.Count;
+      return _codeFactory.GetClassWithSpreadSheetAttribute().Count != SpreadSheetDataTypes.Count;
     }
 
-    // public void SaveAllGroups()
-    // {
-    //   
-    //   foreach (var settingsSerializationGroup in Settings.SerializationGroups)
-    //   {
-    //     if (settingsSerializationGroup.serializationRule == null)
-    //     {
-    //       Debug.LogError($"SerializationRule for {Settings.currentGroup.tag} Group doesn't exist.");
-    //       continue;
-    //     }
-    //     
-    //     var rule = settingsSerializationGroup.serializationRule;
-    //     if (rule.PackSeparately)
-    //     {
-    //       foreach (var spreadSheetContainer in SpreadSheetContainers)
-    //       {
-    //         var sr = (spreadSheetContainer as ISpreadSheetSO);
-    //         if(sr.SerializationGroupTag == settingsSerializationGroup.tag)
-    //           rule.Serialization(sr);
-    //       }
-    //     }
-    //     else
-    //     {
-    //       var container = new SpreadSheetsDatabase();
-    //       foreach (var spreadSheetContainer in SpreadSheetContainers)
-    //       {
-    //         var sr = (spreadSheetContainer as ISpreadSheetSO);
-    //         if(sr.SerializationGroupTag == settingsSerializationGroup.tag)
-    //          container.AddContainer(sr.SheetDataContainer);
-    //       }
-    //       rule.Serialization(container);
-    //       Debug.Log($"{rule.FileName} save to file!");
-    //     }
-    //   }
-    //   
-    //   AssetDatabase.Refresh();
-    // }
-    public void SaveToFile()
+    public void Serialization()
     {
-      var currentProfile = ProfilesContainer.CurrentProfile;
-      var container = new SpreadSheetsDatabase();
-      foreach (var spreadSheetContainer in SpreadSheetContainers)
-      {
-        var sr = (spreadSheetContainer as ISpreadSheetSO);
-        container.AddContainer(sr.SheetDataContainer);
-      }
+      Serialize(SpreadSheetDataTypes.Select(x => (x as ISpreadSheetSO)?.SheetDataContainer).ToList());
+    }
 
-      if (currentProfile.serializationRuleType == string.Empty)
-      {
-        Debug.LogError($"SerializationRule for {currentProfile.profileName} doesn't exist.");
-        return;
-      }
-
-      var t = new JsonSerializationRule();
-      var tr = t.GetType().ToString();
-      var tr2 = t.GetType().FullName;
-      
-      var type = Type.GetType(currentProfile.serializationRuleType);
-      var serializator =
-        Activator.CreateInstance(type) as SerializationRule;
-      serializator.Serialization(currentProfile.savePath, currentProfile.fileName, container);
-      AssetDatabase.Refresh();
-      //
-      // if (Settings.currentGroup.serializationRule == null)
-      // {
-      //   Debug.LogError($"SerializationRule for {Settings.currentGroup.tag} Group doesn't exist.");
-      //   return;
-      // }
-      // var rule = Settings.currentGroup.serializationRule;
-      // if (rule.PackSeparately)
-      // {
-      //   foreach (var spreadSheetContainer in SpreadSheetContainers)
-      //   {
-      //     var sr = (spreadSheetContainer as ISpreadSheetSO);
-      //     if(sr.SerializationGroupTag == Settings.currentGroup.tag)
-      //       rule.Serialization(sr);
-      //   }
-      // }
-      // else
-      // {
-      //   rule.Serialization(container);
-      //   Debug.Log($"{rule.FileName} save to file!".WithColor(ColorExt.CompletedColor));
-      // }
-      //
-      //
-      // AssetDatabase.Refresh();
+    private void Serialize(List<ISheetDataContainer> list)
+    {
+      var serialization = new Serialization(ProfilesContainer.CurrentProfile, list);
+      serialization.SerializationByRule();
     }
 
     public void Dispose()
     {
       _googleSheetsReader?.Dispose();
+    }
+
+    public List<ISheetDataContainer> CreateSheetDataContainers(List<Type> types)
+    {
+      var list = new List<ISheetDataContainer>();
+      types.ForEach(x =>
+      {
+        var constructedType = typeof(SpreadSheetDataContainer<>).MakeGenericType(x);
+        var dataContainer = Activator.CreateInstance(constructedType) as ISheetDataContainer;
+        list.Add(dataContainer);
+      });
+
+      return list;
+    }
+
+    public List<Type> GetContainersType(List<string> tableSheetsNames)
+    {
+      var listOfTypes = new List<Type>();
+      foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+      {
+        assembly.GetTypes().Where(type =>
+            type.GetCustomAttribute(typeof(SpreadSheet)) is SpreadSheet spreadSheet
+            && tableSheetsNames.Contains(spreadSheet.SheetName))
+          .ToList().ForEach(x => { listOfTypes.Add(x); });
+      }
+
+      return listOfTypes;
     }
   }
 }

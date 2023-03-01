@@ -1,5 +1,3 @@
-using System;
-
 namespace Redpenguin.GoogleSheets.Settings.SerializationRules
 {
   public abstract class SerializationRule

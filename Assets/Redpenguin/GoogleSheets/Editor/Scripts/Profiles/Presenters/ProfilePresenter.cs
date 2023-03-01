@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using Redpenguin.GoogleSheets.Attributes;
 using Redpenguin.GoogleSheets.Editor.Models;
 using Redpenguin.GoogleSheets.Settings.SerializationRules;
 using UnityEditor;
@@ -24,6 +22,7 @@ namespace Redpenguin.GoogleSheets.Editor.Profiles.Presenters
     private Label _profileLabelTextField;
     private TextField _fileNameTextField;
     private DropdownField _serializationRuleDropdownField;
+    private Button _buttonClearMeta;
     public BoxContainerPresenter GroupBoxContainer { get; }
 
     public ProfilePresenter(ProfileModel model, VisualElement view, ProfilesContainer container)
@@ -43,6 +42,16 @@ namespace Redpenguin.GoogleSheets.Editor.Profiles.Presenters
       SavePathLink(model);
       CredentialLink(model);
       SerializationRuleLink(model);
+      ButtonClearMetaSetup(model);
+    }
+
+    private void ButtonClearMetaSetup(ProfileModel model)
+    {
+      _buttonClearMeta.clickable.clicked += () =>
+      {
+        _container.ClearMeta(model.profileName);
+        EditorUtility.SetDirty(_container);
+      };
     }
 
     private void ProfileNameLink(ProfileModel model)
@@ -135,6 +144,7 @@ namespace Redpenguin.GoogleSheets.Editor.Profiles.Presenters
       _profileLabelTextField = view.Q<Label>("ProfileLabel");
       _fileNameTextField = view.Q<TextField>("FileName");
       _serializationRuleDropdownField = view.Q<DropdownField>("SerializationRule");
+      _buttonClearMeta = view.Q<Button>("ButtonClearMeta");
     }
     
     private List<Type> GetRules()

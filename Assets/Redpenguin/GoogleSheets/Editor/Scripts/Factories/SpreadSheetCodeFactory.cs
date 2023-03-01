@@ -79,7 +79,7 @@ namespace Redpenguin.GoogleSheets.Editor.Factories
 
     public string CantFindClass()
     {
-      return $"Didn't find classes with {SpreadSheetAttributeLink} attribute. ({ExampleAttributeUsageLink})".WithColor(ColorExt.ErrorColor);
+      return $"Didn't find classes with {SpreadSheetAttributeLink} attribute. Click on link to see example({ExampleAttributeUsageLink})".WithColor(ColorExt.ErrorColor);
     }
     private string Replace(string scriptText, string scriptName, string className, string sheetRange, string nameSpace)
     {

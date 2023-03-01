@@ -20,7 +20,7 @@ namespace Redpenguin.GoogleSheets.Core
       throw new ArgumentNullException();
     }
 
-    public List<T> GetSpreadSheetData<T>() where T : ISheetData
+    public List<T> GetSpreadSheetData<T>() where T : ISheetData, new()
     {
       foreach (var container in Containers.OfType<SpreadSheetDataContainer<T>>())
       {
@@ -29,7 +29,7 @@ namespace Redpenguin.GoogleSheets.Core
 
       throw new Exception($"SpreadSheetsDatabase doesn't have container with data of {typeof(T)} type");
     }
-    public void SetData<T>(List<T> list) where T : ISheetData
+    public void SetData<T>(List<T> list) where T : ISheetData, new()
     {
       foreach (var container in Containers.OfType<SpreadSheetDataContainer<T>>())
       {

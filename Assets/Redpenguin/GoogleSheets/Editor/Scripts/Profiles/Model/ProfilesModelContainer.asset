@@ -21,13 +21,33 @@ MonoBehaviour:
     fileName: ExampleDatabase
     serializationRuleType: Redpenguin.GoogleSheets.Settings.SerializationRules.JsonSerializationRule,
       GoogleSheetsProvider.Runtime, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-    selected: 1
-  - profileName: Test
-    color: {r: 0.754717, g: 0.28123888, b: 0.28123888, a: 1}
-    tableID: 
-    credential: {fileID: 4900000, guid: c92ee1331be804b499a3e444c7c3e56a, type: 3}
-    savePath: Resources/Test
-    fileName: TestDatabase
-    serializationRuleType: Redpenguin.GoogleSheets.Settings.SerializationRules.CSVSerializationRule,
-      GoogleSheetsProvider.Runtime, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
     selected: 0
+    metaData:
+      sheetContainerMetaData:
+      - containerType: Redpenguin.GoogleSheets.Examples.ExampleData2
+        isLoad: 1
+        saveSeparately: 0
+        overrideName: 0
+        savePath: 
+        fileName: 
+      - containerType: Redpenguin.GoogleSheets.Examples.ExampleData
+        isLoad: 1
+        saveSeparately: 0
+        overrideName: 0
+        savePath: 
+        fileName: 
+      tableSheetsNames:
+      - Example
+      - Test
+  - profileName: Merge
+    color: {r: 0.754717, g: 0.28123888, b: 0.28123888, a: 1}
+    tableID: 10SNryFqiXj8PsZn1gVlFE4tADygQyqA1E9Kfhn0Zrhw
+    credential: {fileID: 4900000, guid: 9237bac8a6131574399943e1f67fcaf8, type: 3}
+    savePath: Resources/Merge
+    fileName: MergeDatabase
+    serializationRuleType: Redpenguin.GoogleSheets.Settings.SerializationRules.JsonSerializationRule,
+      GoogleSheetsProvider.Runtime, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    selected: 1
+    metaData:
+      sheetContainerMetaData: []
+      tableSheetsNames: []

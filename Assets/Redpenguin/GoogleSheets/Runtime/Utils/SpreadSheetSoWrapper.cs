@@ -4,11 +4,8 @@ using UnityEngine;
 
 namespace Redpenguin.GoogleSheets
 {
-  public abstract class SpreadSheetSoWrapper: ScriptableObject, ISpreadSheetSO
+  public abstract class SpreadSheetSoWrapper: ScriptableObject, ISheetDataContainer, ISpreadSheetSO
   {
-    public abstract string SerializationGroupTag { get; set; }
-    public abstract bool IsLoad { get; set; }
-    public abstract string JsonSerialized { get; }
     public abstract ISheetDataContainer SheetDataContainer { get; }
     public abstract Type SheetDataType { get; }
     public abstract void SetListCount(int count);

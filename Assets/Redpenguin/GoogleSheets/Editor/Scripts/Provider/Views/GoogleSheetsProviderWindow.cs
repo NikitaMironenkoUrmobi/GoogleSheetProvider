@@ -25,16 +25,6 @@ namespace Redpenguin.GoogleSheets.Editor.Provider.Views
       GetWindow<GoogleSheetsProviderWindow>("Google Sheets Provider").Show();
     }
 
-    private void Awake()
-    {
-      Debug.Log("Awake");
-    }
-
-    private void OnDestroy()
-    {
-      Debug.Log("OnDestroy");
-    }
-
     private void OnEnable()
     {
       SetupGoogleSheetsProvider();
@@ -57,17 +47,24 @@ namespace Redpenguin.GoogleSheets.Editor.Provider.Views
     private void CreateGUI()
     {
       SetupGoogleSheetsProvider();
+      tree.CloneTree(rootVisualElement);
       if(!_googleSheetsProviderPresenter.IsTableIDAndCredentialSetup(rootVisualElement))
         return;
-      
-      tree.CloneTree(rootVisualElement);
+      if (_googleSheetsProviderService.SpreadSheetDataTypes.Count == 0)
+      {
+        var container = rootVisualElement.Q<VisualElement>("Containers");
+        var csharpHelpBox = new HelpBox("Cant find class with SpreadSheet attribute. Look in the console",
+          HelpBoxMessageType.Warning);
+        container.Add(csharpHelpBox);
+        Debug.Log(_googleSheetsProviderService.CantFindClassWithAttribute());
+      }
       ButtonActionLink();
       _googleSheetsProviderPresenter.ModelViewLink(rootVisualElement);
     }
 
     private bool WarningsSetup()
     {
-      if (_googleSheetsProviderService.SpreadSheetContainers.Count == 0)
+      if (_googleSheetsProviderService.SpreadSheetDataTypes.Count == 0)
       {
         if (!_googleSheetsProviderService.CanCreateContainers())
         {
@@ -100,7 +97,7 @@ namespace Redpenguin.GoogleSheets.Editor.Provider.Views
       rootVisualElement.Q<Button>("ButtonClear").clickable.clicked += _googleSheetsProviderService.Clear;
       rootVisualElement.Q<Button>("ButtonLoad").clickable.clicked += _googleSheetsProviderService.LoadSheetsData;
       rootVisualElement.Q<Button>("OpenProfiles").clickable.clicked += () => EditorApplication.ExecuteMenuItem("GoogleSheets/Profiles");
-      rootVisualElement.Q<Button>("ButtonSave").clickable.clicked += _googleSheetsProviderService.SaveToFile;
+      rootVisualElement.Q<Button>("ButtonSave").clickable.clicked += _googleSheetsProviderService.Serialization;
     }
 
     private void ButtonCreateSoSetup()

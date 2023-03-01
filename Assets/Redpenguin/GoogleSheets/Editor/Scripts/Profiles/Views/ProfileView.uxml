@@ -14,5 +14,6 @@
             <ui:TextField picking-mode="Ignore" text="File Name" name="FileName" style="width: 40%;" />
         </ui:VisualElement>
         <ui:DropdownField label="Serialization Rule" index="-1" choices="System.Collections.Generic.List`1[System.String]" name="SerializationRule" />
+        <ui:Button text="Clear Meta" display-tooltip-when-elided="true" name="ButtonClearMeta" style="max-width: 100px;" />
     </ui:GroupBox>
 </ui:UXML>

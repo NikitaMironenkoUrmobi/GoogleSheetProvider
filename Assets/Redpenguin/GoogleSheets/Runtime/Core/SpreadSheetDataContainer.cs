@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using Redpenguin.GoogleSheets.Attributes;
+using Newtonsoft.Json;
+using UnityEngine;
 
 namespace Redpenguin.GoogleSheets.Core
 {
@@ -11,17 +12,39 @@ namespace Redpenguin.GoogleSheets.Core
 
   public interface ISheetDataContainer
   {
+    public Type SheetDataType { get; }
+    void SetListCount(int count);
   }
 
   [Serializable]
-  public class SpreadSheetDataContainer<T> : ISheetDataProvider<T> where T : ISheetData
+  public class SpreadSheetDataContainer<T> : ISheetDataProvider<T> where T : ISheetData, new()
   {
-    public List<T> Data { get; set; }
-    public string Type => GetType().ToString();
+    public List<T> data = new();
 
+    [JsonIgnore] public List<T> Data
+    {
+      get => data;
+      set => data = value;
+    }
+    [JsonIgnore] public Type SheetDataType => typeof(T);
     public SpreadSheetDataContainer(List<T> data)
     {
-      Data = data;
+      this.data = data;
     }
+
+    public SpreadSheetDataContainer()
+    {
+    }
+    
+    public void SetListCount(int count)
+    {
+      var result = count - Data.Count;
+      for (var i = 0; i < result; i++)
+      {
+        Data.Add(new T());
+      }
+    }
+
+    
   }
 }

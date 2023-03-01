@@ -17,18 +17,20 @@ namespace Redpenguin.GoogleSheets.Examples
     public JsonExample jsonExample; // {"id":1,"myString":"string"}
     public ExampleEnum exampleEnum; // Example1
   }
-  [SpreadSheet("Example")] //Get values from Example sheet. Uncomment attribute for create example container
-  [Serializable]
-  public class ExampleData2 : ISheetData
-  {
-    public string myString;         // string
-    public int myInt;               // 1
-    public bool myBool;             // true
-    public List<int> myInts;        // [1,2,3]
-    public List<string> myStrings;  // ["a","b","c"]
-    public JsonExample jsonExample; // {"id":1,"myString":"string"}
-    public ExampleEnum exampleEnum; // Example1
-  }
+  // [SpreadSheet("General")]
+  // [Serializable]
+  // public class GeneralData : ISheetData
+  // {
+  //   public string Parameter;         // string
+  //   public int Value;          
+  // }
+  // [SpreadSheet("Backpack")]
+  // [Serializable]
+  // public class BackpackData : ISheetData
+  // {
+  //   public string slotID;         // string
+  //   public int cost;          
+  // }
 
   [Serializable]
   public class JsonExample

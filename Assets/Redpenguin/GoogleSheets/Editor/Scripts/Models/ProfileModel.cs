@@ -1,4 +1,5 @@
 using System;
+using Redpenguin.GoogleSheets.Editor.Profiles.ProfilesMetaData;
 using UnityEngine;
 
 namespace Redpenguin.GoogleSheets.Editor.Models
@@ -14,5 +15,6 @@ namespace Redpenguin.GoogleSheets.Editor.Models
     public string fileName = string.Empty;
     public string serializationRuleType = string.Empty;
     public bool selected;
+    public ProfileMetaData metaData;
   }
 }

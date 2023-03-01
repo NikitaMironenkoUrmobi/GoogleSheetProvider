@@ -22,28 +22,27 @@ namespace Redpenguin.GoogleSheets.Editor.Core
       _sheetsReader = sheetsReader;
     }
 
-    public void LoadAndLinkSheetsDataToSo(List<ScriptableObject> databaseScriptObj)
+    public void LoadAndFillDataContainers(List<ISheetDataContainer> databaseScriptObj)
     {
       foreach (var database in databaseScriptObj)
       {
-        var databaseSO = (database as ISpreadSheetSO);
-        if(databaseSO.IsLoad == false) continue;
-        var databaseType = database.GetType();
-        var sheetValues = GetSheetValues(databaseSO.SheetDataType);
-        var dataList = databaseType.GetFields().FirstOrDefault(x => (x.GetValue(database) is IList));
+        //var databaseSO = (databaset as ISpreadSheetSO);
+        //var database = databaseSO.SheetDataContainer;
+        //if(databaseSO.IsLoad == false) continue;
+        var sheetValues = GetSheetValues(database.SheetDataType);
+        var dataList = database.GetType().GetFields().FirstOrDefault(x => (x.GetValue(database) is IList));
         if(dataList == null) return;
-        ((ISpreadSheetSO) database).SetListCount(sheetValues.First().Value.Count);
-        SetValues(dataList.GetValue(database) as IList, database, sheetValues);
-        EditorUtility.SetDirty(database);
+        database.SetListCount(sheetValues.First().Value.Count);
+        SetValues(dataList.GetValue(database) as IList, database.SheetDataType.Name, sheetValues);
+        //EditorUtility.SetDirty(databaset);
       }
 
       Debug.Log($"Load data from Google Sheets was completed!".WithColor(ColorExt.CompletedColor));
     }
 
-    private void SetValues(IList dataList, ScriptableObject database,
+    private void SetValues(IList dataList, string soName,
       IReadOnlyDictionary<string, List<object>> sheetValues)
     {
-      //if (!(list.GetValue(database) is IList dataList)) return;
       for (var i = 0; i < dataList.Count; i++)
       {
         var dataClass = dataList[i];
@@ -74,7 +73,7 @@ namespace Redpenguin.GoogleSheets.Editor.Core
           }
           catch
           {
-            Debug.LogError($"Table {database.name}, field {field.Name} format isn't correct!");
+            Debug.LogError($"Table {soName}, field {field.Name} format isn't correct!");
             throw;
           }
         }

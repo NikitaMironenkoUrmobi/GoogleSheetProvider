@@ -1,5 +1,5 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="True">
-    <Style src="project://database/Assets/Redpenguin/GoogleSheets/Editor/Scripts/View/UXML/GoogleSheetsProviderStyles.uss?fileID=7433441132597879392&amp;guid=668bb8db89c761f48b737087471cacb7&amp;type=3#GoogleSheetsProviderStyles" />
+    <Style src="project://database/Assets/Redpenguin/GoogleSheets/Editor/Scripts/Provider/Views/GoogleSheetsProviderStyles.uss?fileID=7433441132597879392&amp;guid=668bb8db89c761f48b737087471cacb7&amp;type=3#GoogleSheetsProviderStyles" />
     <ui:GroupBox style="padding-top: 2px; padding-bottom: 2px; padding-left: 2px; margin-left: 2px; margin-top: 3px; background-color: rgba(0, 0, 0, 0.2);">
         <ui:VisualElement style="flex-direction: row; justify-content: space-between;">
             <ui:VisualElement style="flex-direction: row;">
@@ -8,15 +8,26 @@
             </ui:VisualElement>
             <uie:ObjectField type="UnityEngine.ScriptableObject, UnityEngine.CoreModule" name="ContainerObject" allow-scene-objects="false" focusable="false" style="width: 50%;" />
         </ui:VisualElement>
-        <ui:VisualElement name="PathContainer" style="flex-direction: row; align-items: flex-start; justify-content: space-around;">
-            <ui:VisualElement style="flex-direction: row; width: 100%;">
-                <ui:TextField picking-mode="Ignore" text="Save path" name="SavePath" style="width: 65%;" />
-                <ui:TextField picking-mode="Ignore" text="File Name" name="FileName" style="width: 32%;" />
+        <ui:Foldout text="Additional" value="true" name="AdditionalFoldout">
+            <ui:VisualElement style="flex-direction: column; align-items: flex-start; justify-content: space-around;">
+                <ui:VisualElement name="CustomSaveContainer" style="background-color: rgba(0, 0, 0, 0); width: 100%; flex-direction: row;">
+                    <ui:VisualElement style="background-color: rgba(0, 0, 0, 0); flex-direction: column; width: 65%;">
+                        <ui:VisualElement name="SaveSeparatelyContainer" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); flex-direction: row; width: 63%;">
+                            <ui:Toggle name="SaveSeparatelyToggle" value="false" />
+                            <ui:Label tabindex="-1" text="Save separately" display-tooltip-when-elided="true" />
+                        </ui:VisualElement>
+                        <ui:TextField picking-mode="Ignore" text="Save path" name="SavePath" />
+                    </ui:VisualElement>
+                    <ui:VisualElement style="background-color: rgba(0, 0, 0, 0); width: 35%;">
+                        <ui:VisualElement name="FileNameContainer" style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); flex-direction: row;">
+                            <ui:Toggle name="FileNameToggle" value="false" style="align-self: flex-start;" />
+                            <ui:Label tabindex="-1" text="Name override" display-tooltip-when-elided="true" />
+                        </ui:VisualElement>
+                        <ui:TextField picking-mode="Ignore" text="File Name" name="FileName" />
+                    </ui:VisualElement>
+                </ui:VisualElement>
             </ui:VisualElement>
-        </ui:VisualElement>
-        <ui:VisualElement />
-        <ui:VisualElement style="flex-direction: column;">
-            <ui:VisualElement name="RulesContainer" style="flex-direction: row; flex-wrap: wrap;" />
-        </ui:VisualElement>
+            <ui:Button text="Load" display-tooltip-when-elided="true" name="ButtonLoad" style="width: 50px; align-self: flex-end;" />
+        </ui:Foldout>
     </ui:GroupBox>
 </ui:UXML>

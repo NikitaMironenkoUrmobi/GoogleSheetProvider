@@ -1,10 +1,12 @@
 using System.Collections.Generic;
+using Redpenguin.GoogleSheets.Editor.Profiles.ProfilesMetaData;
+using Redpenguin.GoogleSheets.Editor.Utils;
 using UnityEngine;
 
 namespace Redpenguin.GoogleSheets.Editor.Models
 {
   
-  [CreateAssetMenu(menuName = "Create ProfilesModel", fileName = "ProfilesModel", order = 0)]
+  [CreateAssetMenu(menuName = "GoogleSheetsProvider/Create ProfilesModel", fileName = "ProfilesModel", order = 0)]
   public class ProfilesContainer : ScriptableObject
   {
     public List<ProfileModel> profileModels;
@@ -39,6 +41,20 @@ namespace Redpenguin.GoogleSheets.Editor.Models
       foreach (var model in profileModels)
       {
         model.selected = profileModel == model;
+      }
+    }
+
+    public void ClearMeta(string profileName)
+    {
+      foreach (var model in profileModels)
+      {
+        if (model.profileName == profileName)
+        {
+          model.metaData = new ProfileMetaData();
+          Debug.Log($"{model.profileName} profile meta was deleted!".WithColor(ColorExt.CompletedColor));
+          return;
+        }
+          
       }
     }
   }

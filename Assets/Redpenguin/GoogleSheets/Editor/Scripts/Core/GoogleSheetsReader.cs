@@ -39,9 +39,9 @@ namespace Redpenguin.GoogleSheets.Editor.Core
       return values.ToDictionary(k => k.First().ToString(), list => list.ToList().GetRange(1, list.Count - 1));
     }
 
-    public TableModel GetTableModel()
+    public TableModel GetTableModel(string sheetID)
     {
-      var request = _service.Spreadsheets.Get(_spreadsheetId);
+      var request = _service.Spreadsheets.Get(sheetID);
       request.IncludeGridData = false;
       var spreadsheet = request.Execute();
       return new TableModel
