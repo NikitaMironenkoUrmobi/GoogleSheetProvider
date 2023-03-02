@@ -15,7 +15,7 @@ namespace Redpenguin.GoogleSheets
     public override object ReadJson(JsonReader reader, Type objectType, object existingValue, JsonSerializer serializer)
     {
       var jo = JObject.Load(reader);
-      var type = Type.GetType(jo["Type"].Value<string>());
+      var type = Type.GetType(jo["ContainerType"].Value<string>());
       if (type == null) return null;
       return jo.ToObject(type, serializer);
     }

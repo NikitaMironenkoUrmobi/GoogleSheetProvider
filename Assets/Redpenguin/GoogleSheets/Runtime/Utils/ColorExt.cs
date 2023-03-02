@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Redpenguin.GoogleSheets.Editor.Utils
+namespace Redpenguin.GoogleSheets
 {
   public static class ColorExt
   {

@@ -27,6 +27,7 @@ namespace Redpenguin.GoogleSheets.Core
       set => data = value;
     }
     [JsonIgnore] public Type SheetDataType => typeof(T);
+    public Type ContainerType => GetType();
     public SpreadSheetDataContainer(List<T> data)
     {
       this.data = data;

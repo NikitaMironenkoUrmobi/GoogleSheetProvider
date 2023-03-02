@@ -1,7 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
+using Redpenguin.GoogleSheets.Core;
 using Redpenguin.GoogleSheets.Examples;
-using Redpenguin.GoogleSheets.Provider;
 using UnityEngine;
 
 public class SpreadSheetsDatabaseProviderTest : MonoBehaviour
@@ -10,13 +8,8 @@ public class SpreadSheetsDatabaseProviderTest : MonoBehaviour
     void Start()
     {
         var provider = new SpreadSheetsDatabaseProvider();
-        provider.Load("");
-        Debug.Log(provider.Database.GetSpreadSheetData<ExampleData>()[0].myString);;
+        var database = provider.Load("ExampleProfile");
+        Debug.Log(database.GetSpreadSheetData<ExampleData>()[0].myString);;
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 }

@@ -5,23 +5,24 @@ using System.Text;
 using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
-using Newtonsoft.Json;
-using NUnit.Framework;
 using UnityEditor;
-using UnityEngine;
 
 namespace Redpenguin.GoogleSheets.Editor.Core
 {
-  public class GoogleSheetsReader : IDisposable
+  public interface IGoogleSheetsReader : IDisposable
+  {
+    Dictionary<string, List<object>> GetValuesOnRange(string spreadSheetId, string range);
+    TableModel GetTableModel(string sheetID);
+  }
+
+  public class GoogleSheetsReader : IGoogleSheetsReader
   {
     private static readonly string[] Scopes = {SheetsService.Scope.Spreadsheets};
     private static readonly string ApplicationName = PlayerSettings.productName;
-    private static string _spreadsheetId;
     private static SheetsService _service;
 
-    public GoogleSheetsReader(string spreadSheetId, string clientSecrets)
+    public GoogleSheetsReader(string clientSecrets)
     {
-      _spreadsheetId = spreadSheetId;
       var credential = GoogleCredential.FromJson(clientSecrets).CreateScoped(Scopes);
       _service = new SheetsService(new BaseClientService.Initializer()
       {
@@ -30,12 +31,11 @@ namespace Redpenguin.GoogleSheets.Editor.Core
       });
     }
 
-    public Dictionary<string, List<object>> GetValuesOnRange(string range)
+    public Dictionary<string, List<object>> GetValuesOnRange(string spreadSheetId, string range)
     {
-      var request = _service.Spreadsheets.Values.Get(_spreadsheetId, range);
+      var request = _service.Spreadsheets.Values.Get(spreadSheetId, range);
       request.MajorDimension = SpreadsheetsResource.ValuesResource.GetRequest.MajorDimensionEnum.COLUMNS;
       var values = request.Execute().Values;
-      DebugLog(values);
       return values.ToDictionary(k => k.First().ToString(), list => list.ToList().GetRange(1, list.Count - 1));
     }
 

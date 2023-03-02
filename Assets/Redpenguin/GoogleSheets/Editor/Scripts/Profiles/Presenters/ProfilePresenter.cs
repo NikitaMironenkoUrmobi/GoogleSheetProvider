@@ -1,7 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Redpenguin.GoogleSheets.Editor.Models;
+using Redpenguin.GoogleSheets.Editor.Profiles.Model;
+using Redpenguin.GoogleSheets.Settings;
 using Redpenguin.GoogleSheets.Settings.SerializationRules;
 using UnityEditor;
 using UnityEditor.UIElements;
@@ -24,6 +25,7 @@ namespace Redpenguin.GoogleSheets.Editor.Profiles.Presenters
     private DropdownField _serializationRuleDropdownField;
     private Button _buttonClearMeta;
     public BoxContainerPresenter GroupBoxContainer { get; }
+    private SerializeSettingsContainer SerializeSettingsContainer => _container.SerializeSettingsContainer;
 
     public ProfilePresenter(ProfileModel model, VisualElement view, ProfilesContainer container)
     {
@@ -35,13 +37,15 @@ namespace Redpenguin.GoogleSheets.Editor.Profiles.Presenters
 
     private void ModelViewLink(ProfileModel model)
     {
+      var serializationRuleSettingModel = SerializeSettingsContainer.GetSerializeRuleSetting(model.profileName);
+      FileNameLink(serializationRuleSettingModel);
+      SavePathLink(serializationRuleSettingModel);
+      SerializationRuleLink(serializationRuleSettingModel);
+
       ProfileNameLink(model);
-      FileNameLink(model);
       ProfileColorLink(model);
       TableIDLink(model);
-      SavePathLink(model);
       CredentialLink(model);
-      SerializationRuleLink(model);
       ButtonClearMetaSetup(model);
     }
 
@@ -67,11 +71,12 @@ namespace Redpenguin.GoogleSheets.Editor.Profiles.Presenters
         EditorUtility.SetDirty(_container);
       });
     }
-    private void SerializationRuleLink(ProfileModel model)
+    private void SerializationRuleLink(SerializationRuleSetting model)
     {
       var list = GetRules();
       var list2 = list.Select(x => $"{x}, {x.Assembly}").ToList();
       _serializationRuleDropdownField.choices = list.Select(x => x.Name).ToList();
+      
       if (model.serializationRuleType != Empty)
       {
         var index = list2.FindIndex(x => x == model.serializationRuleType);
@@ -81,7 +86,7 @@ namespace Redpenguin.GoogleSheets.Editor.Profiles.Presenters
       _serializationRuleDropdownField.RegisterValueChangedCallback(x =>
       {
         model.serializationRuleType = list2[_serializationRuleDropdownField.index];
-        EditorUtility.SetDirty(_container);
+        EditorUtility.SetDirty(SerializeSettingsContainer);
       });
     }
     private void TableIDLink(ProfileModel model)
@@ -94,24 +99,24 @@ namespace Redpenguin.GoogleSheets.Editor.Profiles.Presenters
         EditorUtility.SetDirty(_container);
       });
     }
-    private void FileNameLink(ProfileModel model)
+    private void FileNameLink(SerializationRuleSetting model)
     {
       if (model.fileName != Empty)
         _fileNameTextField.SetValueWithoutNotify(model.fileName);
       _fileNameTextField.RegisterValueChangedCallback(x =>
       {
         model.fileName = x.newValue;
-        EditorUtility.SetDirty(_container);
+        EditorUtility.SetDirty(SerializeSettingsContainer);
       });
     }
-    private void SavePathLink(ProfileModel model)
+    private void SavePathLink(SerializationRuleSetting model)
     {
       if (model.savePath != Empty)
         _savePathTextField.SetValueWithoutNotify(model.savePath);
       _savePathTextField.RegisterValueChangedCallback(x =>
       {
         model.savePath = x.newValue;
-        EditorUtility.SetDirty(_container);
+        EditorUtility.SetDirty(SerializeSettingsContainer);
       });
     }
     private void CredentialLink(ProfileModel model)

@@ -1,6 +1,7 @@
 using System;
-using Redpenguin.GoogleSheets.Editor.Models;
+using Redpenguin.GoogleSheets.Editor.Profiles.Model;
 using Redpenguin.GoogleSheets.Editor.Profiles.ProfilesMetaData;
+using Redpenguin.GoogleSheets.Settings;
 using UnityEditor;
 using UnityEditor.UIElements;
 using UnityEngine;
@@ -22,22 +23,24 @@ namespace Redpenguin.GoogleSheets.Editor.Provider.Presenters
     private Foldout _additionalFoldout;
     private VisualElement _fileNameContainer;
     private Toggle _fileNameToggle;
-    private ScriptableObject _scriptableObject;
-    private Button _buttonLoad;
+    private ISpreadSheetSoWrapper _scriptableObject;
+    private Button _buttonSave;
     private Action<Type> _onLoadClick;
+    private Type _modelType;
 
     public SheetContainerPresenter(
       VisualElement view,
-      Type model,
+      Type modelType,
       ProfilesContainer profilesContainer,
-      ScriptableObject scriptableObject, 
+      ISpreadSheetSoWrapper scriptableObject,
       Action<Type> onLoadClick)
     {
+      _modelType = modelType;
       _onLoadClick = onLoadClick;
       _scriptableObject = scriptableObject;
       _profilesContainer = profilesContainer;
       SetView(view);
-      ModelViewLink(model);
+      ModelViewLink(modelType);
     }
 
     private void SetView(VisualElement view)
@@ -51,85 +54,118 @@ namespace Redpenguin.GoogleSheets.Editor.Provider.Presenters
       _additionalFoldout = view.Q<Foldout>("AdditionalFoldout");
       _fileNameContainer = view.Q<VisualElement>("FileNameContainer");
       _fileNameToggle = view.Q<Toggle>("FileNameToggle");
-      _buttonLoad = view.Q<Button>("ButtonLoad");
+      _buttonSave = view.Q<Button>("ButtonSave");
       _groupBox = view.Q<GroupBox>();
     }
 
     private void ModelViewLink(Type dataType)
     {
-
       _containerObject.SetEnabled(_scriptableObject != null);
-      if(_scriptableObject != null)
-        _containerObject.SetValueWithoutNotify(_scriptableObject);
+      _containerObject.objectType = typeof(SpreadSheetSoWrapper);
+      if (_scriptableObject != null)
+        _containerObject.SetValueWithoutNotify(_scriptableObject as SpreadSheetSoWrapper);
       _containerLabel.text = dataType.Name;
-
-      var metaData = _profilesContainer.CurrentProfile.metaData.GetMeta(dataType.ToString());
-      LoadSetup(metaData);
+      
+      var currentProfile = _profilesContainer.CurrentProfile;
+      var metaData =
+        _profilesContainer.SerializeSettingsContainer.GetSerializeSetting(currentProfile.profileName,
+          dataType.ToString());
+      var metaDataEditor = currentProfile.metaData.GetMeta(dataType.ToString());
+      LoadSetup(metaDataEditor);
       SaveSeparatelyToggleSetup(metaData);
       FileNameToggleSetup(metaData);
       SavePathSetup(metaData);
       FileNameSetup(metaData);
 
-      _buttonLoad.clickable.clicked += () => {_onLoadClick.Invoke(dataType); };
+      _buttonSave.clickable.clicked += () => { _onLoadClick.Invoke(dataType); };
     }
 
-    private void SavePathSetup(SheetContainerMetaData metaData)
+    private void SavePathSetup(SerializeSetting metaData)
     {
       if (metaData.savePath != Empty)
         _savePath.SetValueWithoutNotify(metaData.savePath);
       _savePath.RegisterValueChangedCallback(x =>
       {
         metaData.savePath = x.newValue;
-        EditorUtility.SetDirty(_profilesContainer);
+        EditorUtility.SetDirty(_profilesContainer.SerializeSettingsContainer);
       });
     }
 
-    private void FileNameSetup(SheetContainerMetaData metaData)
+    private void FileNameSetup(SerializeSetting metaData)
     {
       if (metaData.fileName != Empty)
         _fileName.SetValueWithoutNotify(metaData.fileName);
       _fileName.RegisterValueChangedCallback(x =>
       {
         metaData.fileName = x.newValue;
-        EditorUtility.SetDirty(_profilesContainer);
+        EditorUtility.SetDirty(_profilesContainer.SerializeSettingsContainer);
       });
     }
 
-    private void SaveSeparatelyToggleSetup(SheetContainerMetaData metaData)
+    private void SaveSeparatelyToggleSetup(SerializeSetting metaData)
     {
+      var data = _profilesContainer.SerializeSettingsContainer.GetSerializeRuleSetting(metaData.profile);
+      if (metaData.saveSeparately && metaData.fileName == Empty)
+      {
+        _fileName.value = _modelType.Name;
+        metaData.fileName = _modelType.Name;
+      }
+
+      if (metaData.saveSeparately && metaData.savePath == Empty)
+      {
+        _savePath.value = data.savePath;
+        metaData.savePath = data.savePath;
+      }
       _additionalFoldout.value = metaData.saveSeparately;
       _saveSeparatelyToggle.SetValueWithoutNotify(metaData.saveSeparately);
       _savePath.style.display = metaData.saveSeparately ? DisplayStyle.Flex : DisplayStyle.None;
       _fileNameContainer.style.display = metaData.saveSeparately ? DisplayStyle.Flex : DisplayStyle.None;
-      _buttonLoad.style.display = metaData.saveSeparately ? DisplayStyle.Flex : DisplayStyle.None;
+      _buttonSave.style.display = metaData.saveSeparately ? DisplayStyle.Flex : DisplayStyle.None;
+      
+
       _saveSeparatelyToggle.RegisterValueChangedCallback(x =>
       {
         metaData.saveSeparately = x.newValue;
+        if (metaData.saveSeparately && metaData.fileName == Empty)
+        {
+          _fileName.value = _modelType.Name;
+          metaData.fileName = _modelType.Name;
+        }
+
+        if (metaData.saveSeparately && metaData.savePath == Empty)
+        {
+          _savePath.value = data.savePath;
+          metaData.savePath = data.savePath;
+        }
         _fileNameToggle.value = false;
         _savePath.style.display = x.newValue ? DisplayStyle.Flex : DisplayStyle.None;
         _fileNameContainer.style.display = x.newValue ? DisplayStyle.Flex : DisplayStyle.None;
-        _buttonLoad.style.display = x.newValue ? DisplayStyle.Flex : DisplayStyle.None;
-        EditorUtility.SetDirty(_profilesContainer);
+        _buttonSave.style.display = x.newValue ? DisplayStyle.Flex : DisplayStyle.None;
+        
+
+        EditorUtility.SetDirty(_profilesContainer.SerializeSettingsContainer);
       });
     }
-    private void FileNameToggleSetup(SheetContainerMetaData metaData)
+
+    private void FileNameToggleSetup(SerializeSetting metaData)
     {
       if (!metaData.saveSeparately)
       {
         metaData.overrideName = false;
         _fileNameToggle.SetValueWithoutNotify(metaData.overrideName);
-        EditorUtility.SetDirty(_profilesContainer);
+        EditorUtility.SetDirty(_profilesContainer.SerializeSettingsContainer);
       }
       else
       {
         _fileNameToggle.SetValueWithoutNotify(metaData.overrideName);
       }
+
       _fileName.style.display = metaData.overrideName ? DisplayStyle.Flex : DisplayStyle.None;
       _fileNameToggle.RegisterValueChangedCallback(x =>
       {
         metaData.overrideName = x.newValue;
         _fileName.style.display = x.newValue ? DisplayStyle.Flex : DisplayStyle.None;
-        EditorUtility.SetDirty(_profilesContainer);
+        EditorUtility.SetDirty(_profilesContainer.SerializeSettingsContainer);
       });
     }
 
@@ -138,7 +174,7 @@ namespace Redpenguin.GoogleSheets.Editor.Provider.Presenters
       _loadToggle.value = metaData.isLoad;
       if (!metaData.isLoad)
       {
-        if(ColorUtility.TryParseHtmlString("#996237", out var color))
+        if (ColorUtility.TryParseHtmlString("#996237", out var color))
         {
           _groupBox.style.backgroundColor = color;
         }
@@ -147,12 +183,13 @@ namespace Redpenguin.GoogleSheets.Editor.Provider.Presenters
       {
         _groupBox.style.backgroundColor = new StyleColor(new Color32(0, 0, 0, 52));
       }
+
       _loadToggle.RegisterValueChangedCallback(x =>
       {
         metaData.isLoad = x.newValue;
         if (!metaData.isLoad)
         {
-          if(ColorUtility.TryParseHtmlString("#996237", out var color))
+          if (ColorUtility.TryParseHtmlString("#996237", out var color))
           {
             _groupBox.style.backgroundColor = color;
           }
@@ -161,6 +198,7 @@ namespace Redpenguin.GoogleSheets.Editor.Provider.Presenters
         {
           _groupBox.style.backgroundColor = new StyleColor(new Color32(0, 0, 0, 52));
         }
+
         EditorUtility.SetDirty(_profilesContainer);
       });
     }

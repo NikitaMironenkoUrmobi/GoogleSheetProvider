@@ -6,11 +6,13 @@ namespace Redpenguin.GoogleSheets.Installer
 {
   public class SpreadSheetProvidersInstaller : MonoInstaller
   {
+    [SerializeField] private string profileName;
+
     public override void InstallBindings()
     {
       var databaseProvider = new SpreadSheetsDatabaseProvider();
-      databaseProvider.Load();
-      foreach (var sheetDataContainer in databaseProvider.Database.Containers)
+      var database = databaseProvider.Load(profileName);
+      foreach (var sheetDataContainer in database.Containers)
       {
         Container.BindInterfacesTo(container.GetType()).FromInstance(container).AsSingle();
       }

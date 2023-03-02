@@ -5,7 +5,9 @@
             <ui:DropdownField choices="System.Collections.Generic.List`1[System.String]" name="ProfileDropdown" index="-1" style="width: 80%;" />
             <ui:Button text="&lt;b&gt;+&lt;/b&gt;" display-tooltip-when-elided="true" name="OpenProfiles" style="width: 20px; -unity-text-align: middle-center; margin-left: 3px; margin-right: 3px;" />
         </ui:VisualElement>
-        <ui:Button text="Load" display-tooltip-when-elided="true" name="ButtonLoad" style="width: 30%;" />
+        <ui:Toggle tooltip="Use SO containers" name="UseSOToggle" style="align-self: center;" />
+        <ui:Toggle name="LoadToggle" tooltip="If true data will be load from remote" style="align-self: center;" />
+        <ui:Button text="Save all" display-tooltip-when-elided="true" name="ButtonSaveAll" style="width: 30%;" />
     </ui:VisualElement>
     <ui:VisualElement style="flex-direction: row; justify-content: flex-start; align-items: auto;">
         <ui:Foldout text="Containers" style="width: 100%;">
@@ -14,13 +16,6 @@
     </ui:VisualElement>
     <ui:VisualElement name="Buttons" style="margin-top: 10px;">
         <ui:Button text="Create containers" display-tooltip-when-elided="true" name="ButtonCreateSO" />
-        <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); flex-direction: row;">
-            <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); width: 50%; flex-direction: row; margin-left: 3px;">
-                <ui:Label tabindex="-1" text="From SO containers" display-tooltip-when-elided="true" style="-unity-text-align: middle-left;" />
-                <ui:Toggle />
-            </ui:VisualElement>
-            <ui:Button text="Save to file" display-tooltip-when-elided="true" name="ButtonSave" style="width: 50%;" />
-        </ui:VisualElement>
         <ui:Button text="Clear all saves" display-tooltip-when-elided="true" name="ButtonClear" />
     </ui:VisualElement>
 </ui:UXML>

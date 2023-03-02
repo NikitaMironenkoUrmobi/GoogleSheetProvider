@@ -5,19 +5,14 @@ namespace Redpenguin.GoogleSheets
 {
   public static class AttributeExtensions
   {
-    public static TValue GetAttributeValue<TAttribute, TValue>(
-      this Type type, 
-      Func<TAttribute, TValue> valueSelector) 
+    public static TValue GetAttributeValue<TAttribute, TValue>(this Type type, Func<TAttribute, TValue> valueSelector)
       where TAttribute : Attribute
     {
-      var att = type.GetCustomAttributes(
-        typeof(TAttribute), true
-      ).FirstOrDefault() as TAttribute;
-      if (att != null)
+      if (type.GetCustomAttributes(typeof(TAttribute), true).FirstOrDefault() is TAttribute att)
       {
         return valueSelector(att);
       }
-      return default(TValue);
+      return default;
     }
   }
 }

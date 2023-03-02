@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Redpenguin.GoogleSheets.Editor.Models;
+using Redpenguin.GoogleSheets.Editor.Profiles.Model;
 using Redpenguin.GoogleSheets.Editor.Utils;
 using UnityEngine.UIElements;
 
@@ -23,9 +23,9 @@ namespace Redpenguin.GoogleSheets.Editor.Profiles.Presenters
       var container = view.Q<VisualElement>("Container");
       SetupButtons(view, container);
 
-      for (var i = 0; i < _model.profileModels.Count; i++)
+      for (var i = 0; i < _model.ProfileModels.Count; i++)
       {
-        var profileModel = _model.profileModels[i];
+        var profileModel = _model.ProfileModels[i];
         AddProfileView(container, profileModel, i);
       }
     }
@@ -35,14 +35,14 @@ namespace Redpenguin.GoogleSheets.Editor.Profiles.Presenters
       view.Q<Button>("ButtonCreateNew").clickable.clicked += () =>
       {
         var profileModel = new ProfileModel();
-        _model.profileModels.Add(profileModel);
-        AddProfileView(container, profileModel, _model.profileModels.Count - 1);
+        _model.ProfileModels.Add(profileModel);
+        AddProfileView(container, profileModel, _model.ProfileModels.Count - 1);
       };
       view.Q<Button>("ButtonRemove").clickable.clicked += () =>
       {
         if (_selectProfile == null) return;
         var index = _profileViews.IndexOf(_selectProfile);
-        _model.profileModels.RemoveAt(index);
+        _model.ProfileModels.RemoveAt(index);
         container.Remove(_profileViews[index]);
         _profileViews.RemoveAt(index);
         _selectProfile = null;

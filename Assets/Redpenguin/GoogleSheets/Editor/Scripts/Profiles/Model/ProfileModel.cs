@@ -2,7 +2,7 @@ using System;
 using Redpenguin.GoogleSheets.Editor.Profiles.ProfilesMetaData;
 using UnityEngine;
 
-namespace Redpenguin.GoogleSheets.Editor.Models
+namespace Redpenguin.GoogleSheets.Editor.Profiles.Model
 {
   [Serializable]
   public class ProfileModel
@@ -11,9 +11,6 @@ namespace Redpenguin.GoogleSheets.Editor.Models
     public Color color;
     public string tableID = string.Empty;
     public TextAsset credential;
-    public string savePath = string.Empty;
-    public string fileName = string.Empty;
-    public string serializationRuleType = string.Empty;
     public bool selected;
     public ProfileMetaData metaData;
   }

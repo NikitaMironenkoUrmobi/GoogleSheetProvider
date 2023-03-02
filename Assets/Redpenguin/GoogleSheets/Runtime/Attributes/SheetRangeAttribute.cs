@@ -3,12 +3,14 @@
 namespace Redpenguin.GoogleSheets.Attributes
 {
   [AttributeUsage(AttributeTargets.Class)]
-  public class SheetRange : Attribute
+  public class SheetRangeAttribute : Attribute
   {
     public readonly string SpreadSheetRange;
+    public Type DataType;
 
-    public SheetRange(string spreadSheetRange)
+    public SheetRangeAttribute(string spreadSheetRange, Type dataType)
     {
+      DataType = dataType;
       SpreadSheetRange = spreadSheetRange;
     }
   }
