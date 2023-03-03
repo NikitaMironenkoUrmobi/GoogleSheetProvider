@@ -8,7 +8,8 @@ using UnityEngine.UIElements;
 
 namespace Redpenguin.GoogleSheets.Editor.Provider.Presenters
 {
-  public class GoogleSheetsProviderPresenter
+  public class GoogleSheetsProviderPresenter : IDisposable
+
   {
     private readonly VisualTreeAsset _tableContainerView;
     private readonly IGoogleSheetsFacade _googleSheetsFacade;
@@ -19,6 +20,7 @@ namespace Redpenguin.GoogleSheets.Editor.Provider.Presenters
     private readonly SerializationSettingPresenter _serializationSettingPresenter;
     private DropdownField _dropdownField;
     public event Action<ProfileModel> OnChangeCurrentProfile;
+
     public GoogleSheetsProviderPresenter(
       VisualTreeAsset tableContainerView,
       IGoogleSheetsFacade googleSheetsFacade,
@@ -29,9 +31,7 @@ namespace Redpenguin.GoogleSheets.Editor.Provider.Presenters
       _profilesContainer = profilesContainer;
       _serializationSettingPresenter = new SerializationSettingPresenter(_profilesContainer);
 
-      _profilesContainer.OnRemoveProfile -= ReSetupDropdownGroups;
       _profilesContainer.OnRemoveProfile += ReSetupDropdownGroups;
-      _profilesContainer.OnNewProfileAdd -= ReSetupDropdownGroups;
       _profilesContainer.OnNewProfileAdd += ReSetupDropdownGroups;
     }
 
@@ -51,7 +51,6 @@ namespace Redpenguin.GoogleSheets.Editor.Provider.Presenters
       }
 
       SetupContainers(_view);
-      
     }
 
     private void SetupContainers(VisualElement view)
@@ -109,7 +108,6 @@ namespace Redpenguin.GoogleSheets.Editor.Provider.Presenters
       OnChangeCurrentProfile?.Invoke(currentProfile);
       RecreateContainers();
       EditorUtility.SetDirty(_profilesContainer);
-      
     }
 
     public bool IsTableIDAndCredentialSetup(VisualElement view)
@@ -138,6 +136,12 @@ namespace Redpenguin.GoogleSheets.Editor.Provider.Presenters
       }
 
       return true;
+    }
+
+    public void Dispose()
+    {
+      _profilesContainer.OnRemoveProfile -= ReSetupDropdownGroups;
+      _profilesContainer.OnNewProfileAdd -= ReSetupDropdownGroups;
     }
   }
 }

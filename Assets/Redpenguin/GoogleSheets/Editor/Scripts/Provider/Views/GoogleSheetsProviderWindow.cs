@@ -56,17 +56,19 @@ namespace Redpenguin.GoogleSheets.Editor.Provider.Views
     private void OnDisable()
     {
       _googleSheetsFacade?.Dispose();
-      AssemblyReloadEvents.afterAssemblyReload -= CreateSoAfterAssemblyReload;
       _googleSheetsProviderPresenter.OnChangeCurrentProfile -= OnChangeCurrentProfile;
+      _googleSheetsProviderPresenter?.Dispose();
+      AssemblyReloadEvents.afterAssemblyReload -= CreateSoAfterAssemblyReload;
+      
     }
 
     private void CreateGUI()
     {
       tree.CloneTree(rootVisualElement);
+      _googleSheetsProviderPresenter.ModelViewLink(rootVisualElement);
       if (!_googleSheetsProviderPresenter.IsTableIDAndCredentialSetup(rootVisualElement))
         return;
       CantFindClasses();
-      _googleSheetsProviderPresenter.ModelViewLink(rootVisualElement);
       ButtonActionLink();
     }
 
@@ -84,12 +86,11 @@ namespace Redpenguin.GoogleSheets.Editor.Provider.Views
 
     private void ButtonActionLink()
     {
+      rootVisualElement.Q<Button>("OpenProfiles").clickable.clicked +=
+        () => EditorApplication.ExecuteMenuItem("GoogleSheets/Profiles");
       rootVisualElement.Q<Button>("ButtonClear").clickable.clicked += _googleSheetsFacade.ClearAllData;
       rootVisualElement.Q<Toggle>("UseSOToggle").RegisterValueChangedCallback(ModalButtonSetup);
       ModalButtonSetup(null);
-
-      rootVisualElement.Q<Button>("OpenProfiles").clickable.clicked +=
-        () => EditorApplication.ExecuteMenuItem("GoogleSheets/Profiles");
     }
 
     private void ModalButtonSetup(ChangeEvent<bool> value)

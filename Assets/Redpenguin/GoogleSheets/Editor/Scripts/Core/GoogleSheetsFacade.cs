@@ -156,6 +156,7 @@ namespace Redpenguin.GoogleSheets.Editor.Core
     {
       if (!_profilesContainer.CurrentProfile.metaData.useSoContainers) return false;
       var currentProfile = _profilesContainer.CurrentProfile;
+      if (currentProfile.credential == null || currentProfile.tableID == string.Empty) return false;
       var tableSheets = GetCurrentProfileTableSheetsNames();
       var spreadSheetClasses = _typesProvider
         .GetClassesWithAttribute<SpreadSheetAttribute>(attribute => tableSheets.Contains(attribute.SheetName));

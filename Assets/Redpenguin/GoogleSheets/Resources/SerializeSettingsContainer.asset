@@ -19,3 +19,19 @@ MonoBehaviour:
     savePath: Resources/Example
     fileName: ExampleDatabase
     serializeSettings: []
+  - profile: Profile_5321
+    serializationRuleType: 
+    savePath: 
+    fileName: 
+    serializeSettings: []
+  - profile: Profile_2276
+    serializationRuleType: 
+    savePath: 
+    fileName: 
+    serializeSettings: []
+  - profile: Profile_3920
+    serializationRuleType: Redpenguin.GoogleSheets.Settings.SerializationRules.JsonSerializationRule,
+      GoogleSheetsProvider.Runtime, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+    savePath: 
+    fileName: 
+    serializeSettings: []

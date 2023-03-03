@@ -16,12 +16,22 @@ MonoBehaviour:
   - profileName: ExampleProfile
     color: {r: 0.36390644, g: 0.33521718, b: 0.8773585, a: 1}
     tableID: 1_uKrO3r_-6_TS492dCcQNxi6flRVAcKLDdbMvhx3BZo
-    credential: {fileID: 4900000, guid: 3f110a0b3d66fdf4a8127a5564963997, type: 3}
-    selected: 1
+    credential: {fileID: 0}
+    selected: 0
     metaData:
       useSoContainers: 1
       loadFromRemote: 1
       sheetContainerMetaData: []
       tableSheetsNames:
       - Example
+  - profileName: Profile_3920
+    color: {r: 0.035487656, g: 0.034432463, b: 0.03547234, a: 1}
+    tableID: sdadaweqe
+    credential: {fileID: 4900000, guid: 3f110a0b3d66fdf4a8127a5564963997, type: 3}
+    selected: 1
+    metaData:
+      useSoContainers: 1
+      loadFromRemote: 1
+      sheetContainerMetaData: []
+      tableSheetsNames: []
   serializeSettingsContainer: {fileID: 11400000, guid: 0511b2f46fca50e42ac1e5976479f95b, type: 2}
