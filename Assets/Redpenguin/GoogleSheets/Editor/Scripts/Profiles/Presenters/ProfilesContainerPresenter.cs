@@ -1,13 +1,15 @@
 using System.Collections.Generic;
 using Redpenguin.GoogleSheets.Editor.Profiles.Model;
 using Redpenguin.GoogleSheets.Editor.Utils;
+using UnityEditor;
+using UnityEngine;
 using UnityEngine.UIElements;
 
 namespace Redpenguin.GoogleSheets.Editor.Profiles.Presenters
 {
   public class ProfilesContainerPresenter
   {
-    private readonly ProfilesContainer _model;
+    private readonly ProfilesContainer _profilesContainer;
     private readonly VisualTreeAsset _profileView;
     private readonly List<VisualElement> _profileViews = new();
     private VisualElement _selectProfile;
@@ -15,7 +17,7 @@ namespace Redpenguin.GoogleSheets.Editor.Profiles.Presenters
     public ProfilesContainerPresenter(VisualTreeAsset profileView)
     {
       _profileView = profileView;
-      _model = AssetDatabaseHelper.FindAssetsByType<ProfilesContainer>()[0];
+      _profilesContainer = AssetDatabaseHelper.FindAssetsByType<ProfilesContainer>()[0];
     }
 
     public void ModelViewLink(VisualElement view)
@@ -23,9 +25,9 @@ namespace Redpenguin.GoogleSheets.Editor.Profiles.Presenters
       var container = view.Q<VisualElement>("Container");
       SetupButtons(view, container);
 
-      for (var i = 0; i < _model.ProfileModels.Count; i++)
+      for (var i = 0; i < _profilesContainer.ProfileModels.Count; i++)
       {
-        var profileModel = _model.ProfileModels[i];
+        var profileModel = _profilesContainer.ProfileModels[i];
         AddProfileView(container, profileModel, i);
       }
     }
@@ -34,25 +36,37 @@ namespace Redpenguin.GoogleSheets.Editor.Profiles.Presenters
     {
       view.Q<Button>("ButtonCreateNew").clickable.clicked += () =>
       {
-        var profileModel = new ProfileModel();
-        _model.ProfileModels.Add(profileModel);
-        AddProfileView(container, profileModel, _model.ProfileModels.Count - 1);
+        var profileModel = new ProfileModel{
+          profileName = $"Profile_{Random.Range(1, 10000)}", 
+          color = Random.ColorHSV()
+        };
+        _profilesContainer.AddNewProfile(profileModel);
+        _profilesContainer.SerializeSettingsContainer.GetSerializeRuleSetting(profileModel.profileName);
+        AddProfileView(container, profileModel, _profilesContainer.ProfileModels.Count - 1);
+        EditorUtility.SetDirty(_profilesContainer);
+        EditorUtility.SetDirty(_profilesContainer.SerializeSettingsContainer);
       };
+      
       view.Q<Button>("ButtonRemove").clickable.clicked += () =>
       {
         if (_selectProfile == null) return;
         var index = _profileViews.IndexOf(_selectProfile);
-        _model.ProfileModels.RemoveAt(index);
+        var profile = _profilesContainer.ProfileModels[index];
+        var profileName = profile.profileName;
+        _profilesContainer.RemoveProfile(profile);
         container.Remove(_profileViews[index]);
         _profileViews.RemoveAt(index);
+        _profilesContainer.SerializeSettingsContainer.RemoveSerializeRuleSetting(profileName);
         _selectProfile = null;
+        EditorUtility.SetDirty(_profilesContainer);
+        EditorUtility.SetDirty(_profilesContainer.SerializeSettingsContainer);
       };
     }
 
     private void AddProfileView(VisualElement view, ProfileModel profileModel, int index)
     {
       var profileView = _profileView.Instantiate();
-      var presenter = new ProfilePresenter(profileModel, profileView, _model);
+      var presenter = new ProfilePresenter(profileModel, profileView, _profilesContainer);
       presenter.GroupBoxContainer.SetProfileClickEvent(OnProfileClick);
       profileView.userData = presenter;
       _profileViews.Add(profileView);

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Linq;
 using Redpenguin.GoogleSheets.Editor.Core;
 using Redpenguin.GoogleSheets.Editor.Profiles.Model;
 using Redpenguin.GoogleSheets.Editor.Provider.Presenters;
@@ -16,7 +14,7 @@ namespace Redpenguin.GoogleSheets.Editor.Provider.Views
     [SerializeField] private VisualTreeAsset tree;
     [SerializeField] private VisualTreeAsset containerView;
 
-    private GoogleSheetsFacade _googleSheetsFacade;
+    private IGoogleSheetsFacade _googleSheetsFacade;
     private bool _isCreatingScripts;
     private GoogleSheetsProviderPresenter _googleSheetsProviderPresenter;
     private ProfilesContainer _profilesContainer;
@@ -34,28 +32,46 @@ namespace Redpenguin.GoogleSheets.Editor.Provider.Views
 
     private void OnEnable()
     {
-      Debug.Log("OnEnable");
       _googleSheetsFacade ??= new GoogleSheetsFacade(
         _profilesContainer,
         AssetDatabaseHelper.FindAssetsByType<SpreadSheetSoWrapper>().Cast<ISpreadSheetSoWrapper>().ToList());
       _googleSheetsFacade.SearchForSpreadSheets();
-      _googleSheetsProviderPresenter ??= new GoogleSheetsProviderPresenter(containerView, _googleSheetsFacade, _profilesContainer);
-      AssemblyReloadEvents.afterAssemblyReload += OnAfterAssemblyReload;
+      _googleSheetsProviderPresenter ??=
+        new GoogleSheetsProviderPresenter(containerView, _googleSheetsFacade, _profilesContainer);
+      _googleSheetsProviderPresenter.OnChangeCurrentProfile += OnChangeCurrentProfile;
+      CreateSoAfterAssemblyReload();
+    }
+
+    private void OnChangeCurrentProfile(ProfileModel profileModel)
+    {
+      _googleSheetsFacade.OnProfileChange(
+        profileModel,
+        AssetDatabaseHelper.FindAssetsByType<SpreadSheetSoWrapper>().Cast<ISpreadSheetSoWrapper>().ToList());
+      var toggle = rootVisualElement.Q<Toggle>("UseSOToggle");
+      toggle.UnregisterValueChangedCallback(ModalButtonSetup);
+      toggle.RegisterValueChangedCallback(ModalButtonSetup);
+      ModalButtonSetup(null);
     }
 
     private void OnDisable()
     {
-      Debug.Log("OnDisable");
       _googleSheetsFacade?.Dispose();
-      AssemblyReloadEvents.afterAssemblyReload -= OnAfterAssemblyReload;
+      AssemblyReloadEvents.afterAssemblyReload -= CreateSoAfterAssemblyReload;
+      _googleSheetsProviderPresenter.OnChangeCurrentProfile -= OnChangeCurrentProfile;
     }
 
     private void CreateGUI()
     {
-      Debug.Log("CreateGUI");
       tree.CloneTree(rootVisualElement);
       if (!_googleSheetsProviderPresenter.IsTableIDAndCredentialSetup(rootVisualElement))
         return;
+      CantFindClasses();
+      _googleSheetsProviderPresenter.ModelViewLink(rootVisualElement);
+      ButtonActionLink();
+    }
+
+    private void CantFindClasses()
+    {
       if (_googleSheetsFacade.SpreadSheetDataTypes.Count == 0)
       {
         var container = rootVisualElement.Q<VisualElement>("Containers");
@@ -64,68 +80,48 @@ namespace Redpenguin.GoogleSheets.Editor.Provider.Views
         container.Add(csharpHelpBox);
         _googleSheetsFacade.CantFindClassWithAttribute();
       }
-
-      ButtonActionLink();
-      _googleSheetsProviderPresenter.ModelViewLink(rootVisualElement);
     }
-
-    private bool WarningsSetup()
-    {
-      if (_googleSheetsFacade.SpreadSheetDataTypes.Count == 0)
-      {
-        if (!_googleSheetsFacade.CanCreateContainers())
-        {
-          var csharpHelpBox = new HelpBox("Cant find class with SpreadSheet attribute. Look in the console",
-            HelpBoxMessageType.Warning);
-          rootVisualElement.Add(csharpHelpBox);
-          _googleSheetsFacade.CantFindClassWithAttribute();
-          return true;
-        }
-
-        var button =
-          new Button(() => { _googleSheetsFacade.CreateAdditionalScripts(v => _isCreatingScripts = v); })
-          {
-            text = "Create containers"
-          };
-        button.style.height = 70;
-        button.style.marginTop = 20;
-        rootVisualElement.Add(button);
-        return true;
-      }
-
-      return false;
-    }
-
 
     private void ButtonActionLink()
     {
-      ButtonCreateSoSetup();
-
       rootVisualElement.Q<Button>("ButtonClear").clickable.clicked += _googleSheetsFacade.ClearAllData;
-      rootVisualElement.Q<Button>("ButtonSaveAll").clickable.clicked += _googleSheetsFacade.SerializeSheetDataContainers;
+      rootVisualElement.Q<Toggle>("UseSOToggle").RegisterValueChangedCallback(ModalButtonSetup);
+      ModalButtonSetup(null);
+
       rootVisualElement.Q<Button>("OpenProfiles").clickable.clicked +=
         () => EditorApplication.ExecuteMenuItem("GoogleSheets/Profiles");
-      //rootVisualElement.Q<Button>("ButtonSave").clickable.clicked += _googleSheetsFacade.SerializeFromScriptableObjectContainers;
     }
 
-    private void ButtonCreateSoSetup()
+    private void ModalButtonSetup(ChangeEvent<bool> value)
     {
-      var createSO = rootVisualElement.Q<Button>("ButtonCreateSO");
-      createSO.style.display = _googleSheetsFacade.CanCreateContainers()
-        ? new StyleEnum<DisplayStyle>(DisplayStyle.Flex)
-        : new StyleEnum<DisplayStyle>(DisplayStyle.None);
-      createSO.clickable.clicked += () => { _googleSheetsFacade.CreateAdditionalScripts(v => _isCreatingScripts = v); };
+      var button = rootVisualElement.Q<Button>("ButtonSaveAll");
+      button.clickable = null;
+
+      if (_googleSheetsFacade.CanCreateContainers())
+      {
+        button.text = "Create containers";
+        button.clickable =
+          new Clickable(() => _googleSheetsFacade.CreateAdditionalScripts(v => _isCreatingScripts = v));
+      }
+      else
+      {
+        button.text = "Save all";
+        button.clickable = new Clickable(_googleSheetsFacade.SerializeSheetData);
+      }
     }
 
-
-    private async void OnAfterAssemblyReload()
+    private void CreateSoAfterAssemblyReload()
     {
       if (_isCreatingScripts == false) return;
       _isCreatingScripts = false;
       _googleSheetsFacade.CreateScriptableObjects();
-      await Task.Delay(TimeSpan.FromSeconds(0.1f));
-      //_googleSheetsFacade.SearchForSpreadSheets();
-      _googleSheetsProviderPresenter.RecreateContainers();
+      _googleSheetsFacade.SearchForSpreadSheets();
+      _googleSheetsFacade.SetupContainers(
+        AssetDatabaseHelper
+          .FindAssetsByType<SpreadSheetSoWrapper>()
+          .Cast<ISpreadSheetSoWrapper>()
+          .ToList()
+      );
     }
   }
 }

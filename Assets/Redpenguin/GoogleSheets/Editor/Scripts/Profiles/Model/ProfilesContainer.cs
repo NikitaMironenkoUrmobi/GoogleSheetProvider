@@ -8,12 +8,14 @@ namespace Redpenguin.GoogleSheets.Editor.Profiles.Model
 {
   public interface IProfilesContainer
   {
+    public event Action<ProfileModel> OnNewProfileAdd;
     List<ProfileModel> ProfileModels { get; set; }
     SerializeSettingsContainer SerializeSettingsContainer { get; }
     ProfileModel CurrentProfile { get; }
-    public event Action<ProfileModel> OnChangeCurrentProfile;
     void SetAsCurrent(ProfileModel profileModel);
     void ClearMeta(string profileName);
+    event Action<ProfileModel> OnRemoveProfile;
+    void RemoveProfile(ProfileModel profileModel);
   }
 
   [CreateAssetMenu(menuName = "GoogleSheetsProvider/Create ProfilesModel", fileName = "ProfilesModel", order = 0)]
@@ -23,7 +25,9 @@ namespace Redpenguin.GoogleSheets.Editor.Profiles.Model
     [SerializeField] private SerializeSettingsContainer serializeSettingsContainer;
     public SerializeSettingsContainer SerializeSettingsContainer => serializeSettingsContainer;
     public ProfileModel CurrentProfile => GetCurrentProfile();
-    public event Action<ProfileModel> OnChangeCurrentProfile;
+
+    public event Action<ProfileModel> OnNewProfileAdd;
+    public event Action<ProfileModel> OnRemoveProfile;
 
     public List<ProfileModel> ProfileModels
     {
@@ -46,23 +50,34 @@ namespace Redpenguin.GoogleSheets.Editor.Profiles.Model
       return current;
     }
 
+    public void AddNewProfile(ProfileModel profileModel)
+    {
+      if(profileModels.Contains(profileModel)) return;
+      profileModels.Add(profileModel);
+      OnNewProfileAdd?.Invoke(profileModel);
+    }
+    public void RemoveProfile(ProfileModel profileModel)
+    {
+      if(!profileModels.Contains(profileModel)) return;
+      profileModels.Remove(profileModel);
+      OnNewProfileAdd?.Invoke(profileModel);
+    }
+
     public void SetAsCurrent(ProfileModel profileModel)
     {
       foreach (var model in profileModels)
       {
         model.selected = profileModel == model;
       }
-      OnChangeCurrentProfile?.Invoke(profileModel);
     }
 
     public void ClearMeta(string profileName)
     {
-      serializeSettingsContainer.Clear(profileName);
       foreach (var model in profileModels)
       {
         if (model.profileName == profileName)
         {
-          model.metaData = new ProfileMetaData();
+          model.metaData.tableSheetsNames.Clear();
           Debug.Log($"{model.profileName} profile meta was deleted!".WithColor(ColorExt.CompletedColor));
           return;
         }

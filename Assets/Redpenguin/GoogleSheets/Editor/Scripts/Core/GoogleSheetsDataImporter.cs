@@ -27,15 +27,11 @@ namespace Redpenguin.GoogleSheets.Editor.Core
     {
       foreach (var sheetDataContainer in loadContainers)
       {
-        //var databaseSO = (databaset as ISpreadSheetSO);
-        //var database = databaseSO.SheetDataContainer;
-        //if(databaseSO.IsLoad == false) continue;
         var sheetValues = GetSheetValues(sheetDataContainer.SheetDataType, tableID);
         var dataList = sheetDataContainer.GetType().GetFields().FirstOrDefault(x => (x.GetValue(sheetDataContainer) is IList));
         if(dataList == null) return;
         sheetDataContainer.SetListCount(sheetValues.First().Value.Count);
         SetValues(dataList.GetValue(sheetDataContainer) as IList, sheetDataContainer.SheetDataType.Name, sheetValues);
-        //EditorUtility.SetDirty(databaset);
       }
 
       Debug.Log($"Load data from Google Sheets was completed!".WithColor(ColorExt.CompletedColor));

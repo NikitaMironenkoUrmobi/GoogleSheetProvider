@@ -12,10 +12,27 @@ using UnityEngine;
 
 namespace Redpenguin.GoogleSheets.Editor.Core
 {
-  public class GoogleSheetsFacade : IDisposable
+  public interface IGoogleSheetsFacade
   {
-    public List<Type> SpreadSheetDataTypes { get; } = new();
-    public List<ISpreadSheetSoWrapper> SpreadSheetSoList { get; }
+    void SerializeSheetData();
+    void SearchForSpreadSheets();
+    public List<Type> SpreadSheetDataTypes { get; }
+    List<ISpreadSheetSoWrapper> SpreadSheetSoList { get; }
+    void CantFindClassWithAttribute();
+    void ClearAllData();
+    bool CanCreateContainers();
+    void CreateAdditionalScripts(Action<bool> action);
+    void SerializeContainer(Type dataType);
+    void CreateScriptableObjects();
+    void SetupContainers(List<ISpreadSheetSoWrapper> list);
+    void Dispose();
+    void OnProfileChange(ProfileModel profileModel, List<ISpreadSheetSoWrapper> containers);
+  }
+
+  public class GoogleSheetsFacade : IDisposable, IGoogleSheetsFacade
+  {
+    public List<Type> SpreadSheetDataTypes { get; private set; } = new();
+    public List<ISpreadSheetSoWrapper> SpreadSheetSoList { get; private set; }
     private readonly IProfilesContainer _profilesContainer;
 
     private readonly IAutoGenFactory _scriptsFactory;
@@ -24,24 +41,31 @@ namespace Redpenguin.GoogleSheets.Editor.Core
 
     private IGoogleSheetsDataImporter _googleSheetsDataImporter;
     private IGoogleSheetsReader _googleSheetsReader;
-    private readonly IConsoleLogger _consoleLogger;
+    private readonly ConsoleLogger _consoleLogger;
 
     public GoogleSheetsFacade(
       IProfilesContainer profilesContainer,
       List<ISpreadSheetSoWrapper> spreadSheetSoList
     )
     {
+      _typesProvider = new TypesProvider();
+      _consoleLogger = new ConsoleLogger();
       _profilesContainer = profilesContainer;
-      SpreadSheetSoList = spreadSheetSoList;
+      var currentProfile = _profilesContainer.CurrentProfile;
+      if (currentProfile.tableID == string.Empty || currentProfile.credential == null)
+      {
+        _consoleLogger.LogProfileCredentialNullException(currentProfile.profileName);
+        return;
+      }
+
+      SetupContainers(spreadSheetSoList);
 
       _googleSheetsReader = new GoogleSheetsReader(_profilesContainer.CurrentProfile.credential.text);
       _googleSheetsDataImporter = new GoogleSheetsDataImporter(_googleSheetsReader);
-      _consoleLogger = new ConsoleLogger();
-      _typesProvider = new TypesProvider();
+
+
       _scriptsFactory = new SpreadSheetCodeFactory(_consoleLogger);
       _scriptableObjectFactory = new SpreadSheetScriptableObjectFactory();
-
-      _profilesContainer.OnChangeCurrentProfile += OnProfileChange;
     }
 
 
@@ -50,10 +74,26 @@ namespace Redpenguin.GoogleSheets.Editor.Core
       _consoleLogger.LogCantFindClassesWithSpreadSheetAttribute();
     }
 
-    private void OnProfileChange(ProfileModel profileModel)
+    public void SetupContainers(List<ISpreadSheetSoWrapper> list)
     {
+      var currentProfile = _profilesContainer.CurrentProfile;
+      var typeList =
+        _typesProvider.GetClassesWithAttribute<SheetRangeAttribute>(attribute =>
+          attribute.Profile == currentProfile.profileName);
+      SpreadSheetSoList = list.Where(x => typeList.Contains(x.GetType())).ToList();
+    }
+
+    public void OnProfileChange(ProfileModel profileModel, List<ISpreadSheetSoWrapper> containers)
+    {
+      if (profileModel == null || profileModel.credential == null)
+      {
+        _consoleLogger.LogProfileCredentialNullException(profileModel?.profileName);
+        return;
+      }
+
       _googleSheetsReader = new GoogleSheetsReader(profileModel.credential.text);
       _googleSheetsDataImporter = new GoogleSheetsDataImporter(_googleSheetsReader);
+      SetupContainers(containers);
       SearchForSpreadSheets();
     }
 
@@ -61,9 +101,8 @@ namespace Redpenguin.GoogleSheets.Editor.Core
     {
       SpreadSheetDataTypes.Clear();
       var tableSheets = GetCurrentProfileTableSheetsNames();
-      var types = _typesProvider.GetClassesWithAttribute<SpreadSheetAttribute>(
+      SpreadSheetDataTypes = _typesProvider.GetClassesWithAttribute<SpreadSheetAttribute>(
         attribute => tableSheets.Contains(attribute.SheetName));
-      types.ForEach(x => SpreadSheetDataTypes.Add(x));
     }
 
     private List<string> GetCurrentProfileTableSheetsNames()
@@ -71,6 +110,7 @@ namespace Redpenguin.GoogleSheets.Editor.Core
       var tableSheets = _profilesContainer.CurrentProfile.metaData.tableSheetsNames;
       if (tableSheets.Count == 0)
       {
+        if (_profilesContainer.CurrentProfile.tableID == string.Empty) return tableSheets;
         _googleSheetsReader.GetTableModel(_profilesContainer.CurrentProfile.tableID).SheetNames
           .ForEach(x => tableSheets.Add(x));
         EditorUtility.SetDirty(_profilesContainer as ScriptableObject);
@@ -106,23 +146,60 @@ namespace Redpenguin.GoogleSheets.Editor.Core
     public void CreateScriptableObjects()
     {
       var currentProfile = _profilesContainer.CurrentProfile;
-      _scriptableObjectFactory.Create(_typesProvider.GetClassesWithAttribute<SheetRangeAttribute>(),
+      _scriptableObjectFactory.Create(_typesProvider.GetClassesWithAttribute<SheetRangeAttribute>(
+          attribute => attribute.Profile == currentProfile.profileName),
         currentProfile.profileName);
-      SearchForSpreadSheets();
+      //SearchForSpreadSheets();
     }
 
     public bool CanCreateContainers()
     {
+      if (!_profilesContainer.CurrentProfile.metaData.useSoContainers) return false;
+      var currentProfile = _profilesContainer.CurrentProfile;
       var tableSheets = GetCurrentProfileTableSheetsNames();
-      return _typesProvider
-               .GetClassesWithAttribute<SpreadSheetAttribute>(attribute => tableSheets.Contains(attribute.SheetName))
-               .Count >
-             _typesProvider.GetClassesWithAttribute<SheetRangeAttribute>(attribute =>
-                 tableSheets.Contains(attribute.DataType.GetAttributeValue((SpreadSheetAttribute st) => st.SheetName)))
-               .Count;
+      var spreadSheetClasses = _typesProvider
+        .GetClassesWithAttribute<SpreadSheetAttribute>(attribute => tableSheets.Contains(attribute.SheetName));
+
+      var sheetRange = _typesProvider.GetClassesWithAttribute<SheetRangeAttribute>(attribute =>
+        attribute.Profile == currentProfile.profileName
+        && tableSheets.Contains(attribute.DataType.GetAttributeValue((SpreadSheetAttribute st) => st.SheetName)));
+
+      return spreadSheetClasses.Count > sheetRange.Count;
     }
 
-    public void SerializeSheetDataContainers()
+    public void SerializeSheetData()
+    {
+      if(SpreadSheetDataTypes.Count == 0) return;
+      var currentProfile = _profilesContainer.CurrentProfile;
+      if (currentProfile.metaData.useSoContainers)
+      {
+        SerializeSheetDataSoContainers(currentProfile);
+      }
+      else
+      {
+        SerializeSheetDataContainers();
+      }
+    }
+
+    private void SerializeSheetDataSoContainers(ProfileModel currentProfile)
+    {
+      var containers = SpreadSheetSoList
+        .Select(x => x.SheetDataContainer)
+        .Where(x => SpreadSheetDataTypes.Contains(x.SheetDataType))
+        .ToList();
+
+      if (currentProfile.metaData.loadFromRemote)
+      {
+        _googleSheetsDataImporter.LoadDataToContainers(
+          containers.Where(x => currentProfile.metaData.GetMeta(x.SheetDataType.ToString()).isLoad).ToList(),
+          currentProfile.tableID);
+        SpreadSheetSoList.ForEach(x => EditorUtility.SetDirty(x as ScriptableObject));
+      }
+
+      SerializeContainers(containers);
+    }
+
+    private void SerializeSheetDataContainers()
     {
       var tableSheets = GetCurrentProfileTableSheetsNames();
       var classesWithAttribute = _typesProvider.GetClassesWithAttribute<SpreadSheetAttribute>(
@@ -140,19 +217,30 @@ namespace Redpenguin.GoogleSheets.Editor.Core
       SerializeContainers(containers);
     }
 
-    public void SerializeContainer(Type containerDataType)
+    public void SerializeContainer(Type dataType)
     {
-      var containers = _typesProvider.CreateSheetDataContainers(new List<Type> {containerDataType});
-      _googleSheetsDataImporter.LoadDataToContainers(containers, _profilesContainer.CurrentProfile.tableID);
-      SerializeContainers(containers);
-    }
-
-    public void SerializeFromScriptableObjectContainers()
-    {
-      SerializeContainers(
-        SpreadSheetSoList
+      var currentProfile = _profilesContainer.CurrentProfile;
+      if (currentProfile.metaData.useSoContainers)
+      {
+        var containers = SpreadSheetSoList
           .Select(x => x.SheetDataContainer)
-          .ToList());
+          .Where(x => dataType == x.SheetDataType)
+          .ToList();
+        if (currentProfile.metaData.loadFromRemote)
+        {
+          _googleSheetsDataImporter.LoadDataToContainers(containers, _profilesContainer.CurrentProfile.tableID);
+          SpreadSheetSoList.ForEach(x => EditorUtility.SetDirty(x as ScriptableObject));
+        }
+          
+
+        SerializeContainers(containers);
+      }
+      else
+      {
+        var containers = _typesProvider.CreateSheetDataContainers(new List<Type> {dataType});
+        _googleSheetsDataImporter.LoadDataToContainers(containers, _profilesContainer.CurrentProfile.tableID);
+        SerializeContainers(containers);
+      }
     }
 
     private void SerializeContainers(List<ISheetDataContainer> containers)
@@ -169,7 +257,6 @@ namespace Redpenguin.GoogleSheets.Editor.Core
 
     public void Dispose()
     {
-      _profilesContainer.OnChangeCurrentProfile -= OnProfileChange;
       _googleSheetsReader?.Dispose();
     }
   }

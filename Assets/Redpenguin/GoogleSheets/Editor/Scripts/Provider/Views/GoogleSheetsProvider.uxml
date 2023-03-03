@@ -1,6 +1,6 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="True">
     <Style src="project://database/Assets/Redpenguin/GoogleSheets/Editor/Scripts/Provider/Views/GoogleSheetsProviderStyles.uss?fileID=7433441132597879392&amp;guid=668bb8db89c761f48b737087471cacb7&amp;type=3#GoogleSheetsProviderStyles" />
-    <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: flex-start; margin-left: 3px; margin-right: 3px; margin-top: 5px;">
+    <ui:VisualElement style="flex-direction: row; justify-content: space-between; align-items: flex-start; margin-left: 3px; margin-right: 3px; margin-top: 5px; min-height: 25px;">
         <ui:VisualElement style="flex-direction: row; justify-content: flex-start; width: 50%;">
             <ui:DropdownField choices="System.Collections.Generic.List`1[System.String]" name="ProfileDropdown" index="-1" style="width: 80%;" />
             <ui:Button text="&lt;b&gt;+&lt;/b&gt;" display-tooltip-when-elided="true" name="OpenProfiles" style="width: 20px; -unity-text-align: middle-center; margin-left: 3px; margin-right: 3px;" />
@@ -9,13 +9,8 @@
         <ui:Toggle name="LoadToggle" tooltip="If true data will be load from remote" style="align-self: center;" />
         <ui:Button text="Save all" display-tooltip-when-elided="true" name="ButtonSaveAll" style="width: 30%;" />
     </ui:VisualElement>
-    <ui:VisualElement style="flex-direction: row; justify-content: flex-start; align-items: auto;">
-        <ui:Foldout text="Containers" style="width: 100%;">
-            <ui:VisualElement name="Containers" />
-        </ui:Foldout>
-    </ui:VisualElement>
-    <ui:VisualElement name="Buttons" style="margin-top: 10px;">
-        <ui:Button text="Create containers" display-tooltip-when-elided="true" name="ButtonCreateSO" />
-        <ui:Button text="Clear all saves" display-tooltip-when-elided="true" name="ButtonClear" />
+    <ui:ScrollView name="Containers" elasticity="0.1" scroll-deceleration-rate="0.135" />
+    <ui:VisualElement name="Buttons" style="margin-top: 10px; min-height: 25px;">
+        <ui:Button text="Clear cache" display-tooltip-when-elided="true" name="ButtonClear" style="width: 50%; align-self: center;" />
     </ui:VisualElement>
 </ui:UXML>

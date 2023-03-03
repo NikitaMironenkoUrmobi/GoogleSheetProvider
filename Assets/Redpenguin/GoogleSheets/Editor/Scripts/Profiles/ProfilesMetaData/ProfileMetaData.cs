@@ -13,12 +13,12 @@ namespace Redpenguin.GoogleSheets.Editor.Profiles.ProfilesMetaData
     [SerializeField] private List<SheetContainerMetaData> sheetContainerMetaData = new();
     public List<string> tableSheetsNames = new();
 
-    public SheetContainerMetaData GetMeta(string containerType)
+    public SheetContainerMetaData GetMeta(string containerDataType)
     {
-      var data = sheetContainerMetaData.Find(x => x.containerType == containerType);
+      var data = sheetContainerMetaData.Find(x => x.containerType == containerDataType);
       if (data == null)
       {
-        data = new SheetContainerMetaData {containerType = containerType};
+        data = new SheetContainerMetaData {containerType = containerDataType};
         sheetContainerMetaData.Add(data);
       }
 

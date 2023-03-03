@@ -88,7 +88,6 @@ namespace Redpenguin.GoogleSheets.Core
           Debug.Log(
             $"Load {serializationRuleSetting.fileName} from Resources\\{loadPath}".WithColor(ColorExt.CompletedColor));
         }
-        
       }
 
       foreach (var serializeSetting in serializeSettings)

@@ -5,7 +5,7 @@ using Redpenguin.GoogleSheets.Core;
 
 namespace Redpenguin.GoogleSheets.Examples
 {
-  [SpreadSheet("Example")] //Get values from Example sheet. Uncomment attribute for create example container
+  //[SpreadSheet("Example")] //Get values from Example sheet. Uncomment attribute for create example container
   [Serializable]
   public class ExampleData : ISheetData
   {
@@ -17,7 +17,7 @@ namespace Redpenguin.GoogleSheets.Examples
     public JsonExample jsonExample; // {"id":1,"myString":"string"}
     public ExampleEnum exampleEnum; // Example1
   }
-
+  
   [Serializable]
   public class JsonExample
   {
@@ -32,12 +32,23 @@ namespace Redpenguin.GoogleSheets.Examples
     Example2
   }
 
+  //Access via extension to container with ExampleData
   public static class ExampleDataProviderExtension
   {
     public static bool HasBoolTrue(this ISheetDataProvider<ExampleData> provider)
     {
       var data = provider.Data.Find(x => x.myBool);
       return data != null;
+    }
+  }
+
+  public class ExampleDatabaseProvider
+  {
+    public ExampleDatabaseProvider()
+    {
+      var databaseProvider = new SpreadSheetsDatabaseProvider();
+      var database = databaseProvider.Load("ExampleProfile"); //Load all sheets that contains profile
+      var exampleData = database.GetSpreadSheetData<ExampleData>(); //Get list of ExampleData
     }
   }
 }

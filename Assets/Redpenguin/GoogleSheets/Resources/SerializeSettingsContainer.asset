@@ -12,20 +12,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 27b843de5dbb427b845a394381473757, type: 3}
   m_Name: SerializeSettingsContainer
   m_EditorClassIdentifier: 
-  serializeSettings:
-  - profile: ExampleProfile
-    containerType: Redpenguin.GoogleSheets.Examples.ExampleData
-    saveSeparately: 1
-    overrideName: 0
-    savePath: Resources/Example
-    fileName: ExampleData
   serializationRuleSetting:
   - profile: ExampleProfile
     serializationRuleType: Redpenguin.GoogleSheets.Settings.SerializationRules.JsonSerializationRule,
       GoogleSheetsProvider.Runtime, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
     savePath: Resources/Example
     fileName: ExampleDatabase
-  - profile: 
-    serializationRuleType: 
-    savePath: 
-    fileName: 
+    serializeSettings: []

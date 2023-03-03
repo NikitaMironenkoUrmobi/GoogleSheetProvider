@@ -19,11 +19,9 @@ MonoBehaviour:
     credential: {fileID: 4900000, guid: 3f110a0b3d66fdf4a8127a5564963997, type: 3}
     selected: 1
     metaData:
-      useSoContainers: 0
+      useSoContainers: 1
       loadFromRemote: 1
-      sheetContainerMetaData:
-      - containerType: Redpenguin.GoogleSheets.Examples.ExampleData
-        isLoad: 1
+      sheetContainerMetaData: []
       tableSheetsNames:
       - Example
   serializeSettingsContainer: {fileID: 11400000, guid: 0511b2f46fca50e42ac1e5976479f95b, type: 2}

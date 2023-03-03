@@ -62,6 +62,11 @@ namespace Redpenguin.GoogleSheets.Editor.Provider.Presenters
     {
       _containerObject.SetEnabled(_scriptableObject != null);
       _containerObject.objectType = typeof(SpreadSheetSoWrapper);
+      _containerObject.RegisterValueChangedCallback(x =>
+      {
+        _containerObject.SetValueWithoutNotify(x.previousValue);
+      });
+     
       if (_scriptableObject != null)
         _containerObject.SetValueWithoutNotify(_scriptableObject as SpreadSheetSoWrapper);
       _containerLabel.text = dataType.Name;
@@ -72,14 +77,13 @@ namespace Redpenguin.GoogleSheets.Editor.Provider.Presenters
           dataType.ToString());
       var metaDataEditor = currentProfile.metaData.GetMeta(dataType.ToString());
       LoadSetup(metaDataEditor);
-      SaveSeparatelyToggleSetup(metaData);
+      SaveSeparatelyToggleSetup(metaData, currentProfile.profileName);
       FileNameToggleSetup(metaData);
       SavePathSetup(metaData);
       FileNameSetup(metaData);
 
       _buttonSave.clickable.clicked += () => { _onLoadClick.Invoke(dataType); };
     }
-
     private void SavePathSetup(SerializeSetting metaData)
     {
       if (metaData.savePath != Empty)
@@ -102,9 +106,9 @@ namespace Redpenguin.GoogleSheets.Editor.Provider.Presenters
       });
     }
 
-    private void SaveSeparatelyToggleSetup(SerializeSetting metaData)
+    private void SaveSeparatelyToggleSetup(SerializeSetting metaData, string profileName)
     {
-      var data = _profilesContainer.SerializeSettingsContainer.GetSerializeRuleSetting(metaData.profile);
+      var data = _profilesContainer.SerializeSettingsContainer.GetSerializeRuleSetting(profileName);
       if (metaData.saveSeparately && metaData.fileName == Empty)
       {
         _fileName.value = _modelType.Name;

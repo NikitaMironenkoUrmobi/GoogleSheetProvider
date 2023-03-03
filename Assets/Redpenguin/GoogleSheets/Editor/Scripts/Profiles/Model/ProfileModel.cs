@@ -12,6 +12,6 @@ namespace Redpenguin.GoogleSheets.Editor.Profiles.Model
     public string tableID = string.Empty;
     public TextAsset credential;
     public bool selected;
-    public ProfileMetaData metaData;
+    public ProfileMetaData metaData = new();
   }
 }

@@ -7,11 +7,12 @@ namespace Redpenguin.GoogleSheets.Attributes
   {
     public readonly string SpreadSheetRange;
     public Type DataType;
-
-    public SheetRangeAttribute(string spreadSheetRange, Type dataType)
+    public readonly string Profile;
+    public SheetRangeAttribute(string spreadSheetRange, Type dataType, string profile)
     {
       DataType = dataType;
       SpreadSheetRange = spreadSheetRange;
+      Profile = profile;
     }
   }
 }

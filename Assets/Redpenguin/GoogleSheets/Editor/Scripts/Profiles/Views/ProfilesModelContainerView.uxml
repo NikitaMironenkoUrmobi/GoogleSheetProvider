@@ -1,6 +1,6 @@
 <ui:UXML xmlns:ui="UnityEngine.UIElements" xmlns:uie="UnityEditor.UIElements" editor-extension-mode="True">
     <Style src="project://database/Assets/Redpenguin/GoogleSheets/Editor/Scripts/Provider/Views/GoogleSheetsProviderStyles.uss?fileID=7433441132597879392&amp;guid=668bb8db89c761f48b737087471cacb7&amp;type=3#GoogleSheetsProviderStyles" />
-    <ui:VisualElement name="Container" />
+    <ui:ScrollView scroll-deceleration-rate="0,135" elasticity="0,1" name="Container" />
     <ui:VisualElement style="flex-direction: row; justify-content: flex-end; margin-right: 10px; min-height: 20px;">
         <ui:Button text="&lt;b&gt;+&lt;/b&gt;" display-tooltip-when-elided="true" name="ButtonCreateNew" style="width: 25px;" />
         <ui:Button text="&lt;b&gt;-&lt;/b&gt;" display-tooltip-when-elided="true" name="ButtonRemove" style="width: 25px;" />

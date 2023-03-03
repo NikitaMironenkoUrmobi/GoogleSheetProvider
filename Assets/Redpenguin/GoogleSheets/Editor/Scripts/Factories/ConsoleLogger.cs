@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace Redpenguin.GoogleSheets.Editor.Factories
 {
-  public class ConsoleLogger : IConsoleLogger
+  public class ConsoleLogger
   {
     private const string SpreadSheetAttributeLink
       = "<a href=\"Assets/Redpenguin/GoogleSheets/Runtime/Attributes/SpreadSheet.cs\" line=\"6\">SpreadSheet</a>";
@@ -19,6 +19,11 @@ namespace Redpenguin.GoogleSheets.Editor.Factories
     {
       Debug.LogError(
         $"Can't find class with SpreadSheet attribute that has SheetName which contains in {profileName} profile table");
+    }
+    public void LogProfileCredentialNullException(string profileName)
+    {
+      Debug.LogError(
+        $"{profileName} profile credential is null");
     }
   }
 }

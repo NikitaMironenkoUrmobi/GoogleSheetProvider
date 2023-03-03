@@ -42,7 +42,7 @@ namespace Redpenguin.GoogleSheets.Editor.Profiles.Presenters
       SavePathLink(serializationRuleSettingModel);
       SerializationRuleLink(serializationRuleSettingModel);
 
-      ProfileNameLink(model);
+      ProfileNameLink(model, serializationRuleSettingModel);
       ProfileColorLink(model);
       TableIDLink(model);
       CredentialLink(model);
@@ -58,7 +58,7 @@ namespace Redpenguin.GoogleSheets.Editor.Profiles.Presenters
       };
     }
 
-    private void ProfileNameLink(ProfileModel model)
+    private void ProfileNameLink(ProfileModel model, SerializationRuleSetting serializationRuleSetting)
     {
       if (model.profileName != Empty)
         _profileNameTextField.SetValueWithoutNotify(model.profileName);
@@ -68,7 +68,9 @@ namespace Redpenguin.GoogleSheets.Editor.Profiles.Presenters
       {
         model.profileName = x.newValue;
         _profileLabelTextField.text = x.newValue;
+        serializationRuleSetting.profile = x.newValue;
         EditorUtility.SetDirty(_container);
+        EditorUtility.SetDirty(_container.SerializeSettingsContainer);
       });
     }
     private void SerializationRuleLink(SerializationRuleSetting model)
