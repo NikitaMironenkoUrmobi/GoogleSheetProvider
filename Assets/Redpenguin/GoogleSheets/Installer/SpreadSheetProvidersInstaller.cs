@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Redpenguin.GoogleSheets.Settings;
 #endif
+using System.ComponentModel;
 using Redpenguin.GoogleSheets.Core;
 using UnityEngine;
 using Zenject;
@@ -29,16 +30,13 @@ namespace Redpenguin.GoogleSheets.Installer
       }
     }
 
-#if ENABLE_NAUGHTY_ATTRIBUTES
-    [Button()]
-    private void LoadProfiles()
+    private void Reset()
     {
       profiles = Resources.Load<SerializeSettingsContainer>("SerializeSettingsContainer")
         .SerializationRuleSetting
         .Select(x => x.profile)
         .ToList();
     }
-#endif
   }
 }
 #endif
