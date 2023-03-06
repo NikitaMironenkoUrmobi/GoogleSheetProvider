@@ -8,9 +8,9 @@
         </ui:VisualElement>
         <ui:Button text="Save all" display-tooltip-when-elided="true" name="ButtonSaveAll" style="width: 30%;" />
     </ui:VisualElement>
-    <ui:VisualElement style="background-color: rgba(0, 0, 0, 0); flex-direction: row; justify-content: space-around;">
+    <ui:VisualElement style="background-color: rgba(0, 0, 0, 0); flex-direction: row; justify-content: flex-start; flex-wrap: wrap;">
         <ui:Toggle tooltip="Use SO containers" name="UseSOToggle" label="Use SO containers" style="align-self: center;" />
-        <ui:Toggle name="LoadToggle" tooltip="If true data will be load from remote" label="Load from remote" style="align-self: center;" />
+        <ui:Toggle name="LoadToggle" tooltip="If true data will be load from remote" label="Load from remote" style="align-self: center; display: flex;" />
     </ui:VisualElement>
     <ui:ScrollView name="Containers" elasticity="0.1" scroll-deceleration-rate="0.135" />
     <ui:VisualElement name="Buttons" style="margin-top: 10px; min-height: 25px;">
