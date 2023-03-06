@@ -64,10 +64,11 @@ namespace Redpenguin.GoogleSheets.Editor.Provider.Views
 
     private void CreateGUI()
     {
-      tree.CloneTree(rootVisualElement);
-      _googleSheetsProviderPresenter.ModelViewLink(rootVisualElement);
       if (!_googleSheetsProviderPresenter.IsTableIDAndCredentialSetup(rootVisualElement))
         return;
+      tree.CloneTree(rootVisualElement);
+      _googleSheetsProviderPresenter.ModelViewLink(rootVisualElement);
+      
       CantFindClasses();
       ButtonActionLink();
     }

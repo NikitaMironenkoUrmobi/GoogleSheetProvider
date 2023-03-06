@@ -12,6 +12,7 @@ namespace Redpenguin.GoogleSheets.Editor.Profiles.Model
     List<ProfileModel> ProfileModels { get; set; }
     SerializeSettingsContainer SerializeSettingsContainer { get; }
     ProfileModel CurrentProfile { get; }
+    bool HasValidProfile { get; }
     void SetAsCurrent(ProfileModel profileModel);
     void ClearMeta(string profileName);
     event Action<ProfileModel> OnRemoveProfile;
@@ -35,6 +36,8 @@ namespace Redpenguin.GoogleSheets.Editor.Profiles.Model
       set => profileModels = value;
     }
 
+    public bool HasValidProfile => profileModels.Exists(x => x.IsValid); 
+
     private ProfileModel GetCurrentProfile()
     {
       if (profileModels.Count == 0)
@@ -44,7 +47,7 @@ namespace Redpenguin.GoogleSheets.Editor.Profiles.Model
       var current = profileModels.Find(x => x.selected);
       if (current == null)
       {
-        current = profileModels[0];
+        current = profileModels.Find(x => x.IsValid) ?? profileModels[0];
         current.selected = true;
       }
       return current;

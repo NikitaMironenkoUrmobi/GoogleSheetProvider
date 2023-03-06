@@ -6,6 +6,7 @@ using Google.Apis.Auth.OAuth2;
 using Google.Apis.Services;
 using Google.Apis.Sheets.v4;
 using UnityEditor;
+using UnityEngine;
 
 namespace Redpenguin.GoogleSheets.Editor.Core
 {
@@ -41,13 +42,24 @@ namespace Redpenguin.GoogleSheets.Editor.Core
 
     public TableModel GetTableModel(string sheetID)
     {
-      var request = _service.Spreadsheets.Get(sheetID);
-      request.IncludeGridData = false;
-      var spreadsheet = request.Execute();
-      return new TableModel
+      try
       {
-        SheetNames = spreadsheet.Sheets.Select(x => x.Properties.Title).ToList()
-      };
+        var request = _service.Spreadsheets.Get(sheetID);
+        request.IncludeGridData = false;
+        var spreadsheet = request.Execute();
+        return new TableModel
+        {
+          SheetNames = spreadsheet.Sheets.Select(x => x.Properties.Title).ToList()
+        };
+      }
+      catch (Exception e)
+      {
+        Debug.LogError(e);
+        return new TableModel
+        {
+          SheetNames = new List<string>()
+        };
+      }
     }
     
     

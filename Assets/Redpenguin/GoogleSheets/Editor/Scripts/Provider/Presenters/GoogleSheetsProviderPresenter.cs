@@ -93,6 +93,7 @@ namespace Redpenguin.GoogleSheets.Editor.Provider.Presenters
 
     private void ReSetupDropdownGroups(ProfileModel profileModel)
     {
+      if (_dropdownField == null  || _view == null) return;
       _dropdownField.UnregisterValueChangedCallback(OnChangeDropdownValue);
       DropdownGroupsSetup(_view);
     }
@@ -112,6 +113,18 @@ namespace Redpenguin.GoogleSheets.Editor.Provider.Presenters
 
     public bool IsTableIDAndCredentialSetup(VisualElement view)
     {
+      if (_profilesContainer.ProfileModels.Count == 0)
+      {
+        var csharpHelpBox = new HelpBox("Profile list is empty", HelpBoxMessageType.Warning);
+        view.Add(csharpHelpBox);
+        var button = new Button(() => EditorApplication.ExecuteMenuItem("GoogleSheets/Profiles"))
+        {
+          text = "Setup Profile"
+        };
+        view.Add(button);
+        return false;
+      }
+
       var currentProfile = _profilesContainer.CurrentProfile;
       if (currentProfile.tableID == string.Empty)
       {

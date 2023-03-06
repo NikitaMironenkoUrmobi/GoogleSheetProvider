@@ -51,6 +51,8 @@ namespace Redpenguin.GoogleSheets.Editor.Core
       _typesProvider = new TypesProvider();
       _consoleLogger = new ConsoleLogger();
       _profilesContainer = profilesContainer;
+      if (!_profilesContainer.HasValidProfile) return;
+      
       var currentProfile = _profilesContainer.CurrentProfile;
       if (currentProfile.tableID == string.Empty || currentProfile.credential == null)
       {
@@ -85,7 +87,7 @@ namespace Redpenguin.GoogleSheets.Editor.Core
 
     public void OnProfileChange(ProfileModel profileModel, List<ISpreadSheetSoWrapper> containers)
     {
-      if (profileModel == null || profileModel.credential == null)
+      if (profileModel is not {IsValid: true})
       {
         _consoleLogger.LogProfileCredentialNullException(profileModel?.profileName);
         return;
@@ -99,6 +101,7 @@ namespace Redpenguin.GoogleSheets.Editor.Core
 
     public void SearchForSpreadSheets()
     {
+      if (!_profilesContainer.HasValidProfile || !_profilesContainer.CurrentProfile.IsValid) return;
       SpreadSheetDataTypes.Clear();
       var tableSheets = GetCurrentProfileTableSheetsNames();
       SpreadSheetDataTypes = _typesProvider.GetClassesWithAttribute<SpreadSheetAttribute>(
