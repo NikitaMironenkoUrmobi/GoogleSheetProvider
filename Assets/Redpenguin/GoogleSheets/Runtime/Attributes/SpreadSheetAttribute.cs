@@ -8,12 +8,12 @@ namespace Redpenguin.GoogleSheets.Attributes
     public string SheetName;
     public string From;
     public string To;
-    public string ProfileName;
+    public string[] Profiles;
 
     public string Range => $"{SheetName}!{From}:{To}";
-    public SpreadSheetAttribute(string sheetName, string from = "A1", string to = "Z1000", string profileName = "")
+    public SpreadSheetAttribute(string sheetName, string from = "A1", string to = "Z1000", params string[] profiles)
     {
-      ProfileName = profileName;
+      Profiles = profiles;
       SheetName = sheetName;
       From = from;
       To = to;

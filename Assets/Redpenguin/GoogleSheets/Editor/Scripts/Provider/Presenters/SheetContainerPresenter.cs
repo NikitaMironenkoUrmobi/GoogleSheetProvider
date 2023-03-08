@@ -81,6 +81,8 @@ namespace Redpenguin.GoogleSheets.Editor.Provider.Presenters
       FileNameToggleSetup(metaData);
       SavePathSetup(metaData);
       FileNameSetup(metaData);
+      EditorUtility.SetDirty(_profilesContainer.SerializeSettingsContainer);
+      EditorUtility.SetDirty(_profilesContainer);
 
       _buttonSave.clickable.clicked += () => { _onLoadClick.Invoke(dataType); };
     }
