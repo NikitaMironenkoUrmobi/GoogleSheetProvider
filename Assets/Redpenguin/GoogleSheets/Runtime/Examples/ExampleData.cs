@@ -47,7 +47,7 @@ namespace Redpenguin.GoogleSheets.Examples
     public ExampleDatabaseProvider()
     {
       var databaseProvider = new SpreadSheetsDatabaseProvider();
-      var database = databaseProvider.Load("ExampleProfile"); //Load all sheets that contains profile
+      var database = databaseProvider.Load("ExampleProfile"); //Load all sheets that profile contains 
       var exampleData = database.GetSpreadSheetData<ExampleData>(); //Get list of ExampleData
     }
   }

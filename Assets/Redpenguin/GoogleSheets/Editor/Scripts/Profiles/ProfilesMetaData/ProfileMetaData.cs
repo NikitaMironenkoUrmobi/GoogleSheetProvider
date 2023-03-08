@@ -7,7 +7,7 @@ namespace Redpenguin.GoogleSheets.Editor.Profiles.ProfilesMetaData
   [Serializable]
   public class ProfileMetaData
   {
-    public bool useSoContainers = true;
+    public bool useSoContainers = false;
     public bool loadFromRemote = true;
 
     [SerializeField] private List<SheetContainerMetaData> sheetContainerMetaData = new();
