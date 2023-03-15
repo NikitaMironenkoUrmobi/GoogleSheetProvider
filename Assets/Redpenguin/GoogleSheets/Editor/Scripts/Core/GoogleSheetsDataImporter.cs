@@ -39,6 +39,7 @@ namespace Redpenguin.GoogleSheets.Editor.Core
 
     private void SetValues(IList dataList, string sheetName, IReadOnlyDictionary<string, List<object>> sheetValues)
     {
+      var emptyData = new List<EmptyObject>();
       for (var i = 0; i < dataList.Count; i++)
       {
         var dataClass = dataList[i];
@@ -50,6 +51,14 @@ namespace Redpenguin.GoogleSheets.Editor.Core
           if (sheetValues[fieldName].Count <= i) continue;
 
           var fieldData = sheetValues[fieldName][i];
+          if (fieldData == null || fieldData.ToString() == string.Empty)
+          {
+            
+            var data = new EmptyObject(sheetName, field.Name, i + 1, dataClass);
+            if(!emptyData.Contains(data))
+              emptyData.Add(data);
+            continue;
+          }
           var isJson = IsJson(field.FieldType, fieldData);
           var isEnum = IsEnum(field.FieldType, fieldData);
           try
@@ -73,6 +82,52 @@ namespace Redpenguin.GoogleSheets.Editor.Core
             throw;
           }
         }
+      }
+      foreach (var objectToDelete in emptyData)
+      {
+        Debug.LogWarning($"Sheet {objectToDelete.SheetName}, field {objectToDelete.FieldName} row {objectToDelete.Row} is empty!. Skip object this object.");
+        dataList.Remove(objectToDelete.Obj);
+      }
+    }
+
+    private struct EmptyObject
+    {
+      public bool Equals(EmptyObject other)
+      {
+        return Equals(Obj, other.Obj);
+      }
+
+      public override bool Equals(object obj)
+      {
+        return obj is EmptyObject other && Equals(other);
+      }
+
+      public override int GetHashCode()
+      {
+        return HashCode.Combine(Row, SheetName, FieldName, Obj);
+      }
+
+      public readonly int Row;
+      public readonly string SheetName;
+      public readonly string FieldName;
+      public readonly object Obj;
+
+      public EmptyObject(string sheetName, string fieldName, int row, object obj)
+      {
+        SheetName = sheetName;
+        Row = row;
+        Obj = obj;
+        FieldName = fieldName;
+      }
+
+      public static bool operator ==(EmptyObject obj1, EmptyObject obj2)
+      {
+        return obj1.Obj == obj2.Obj;
+      }
+
+      public static bool operator !=(EmptyObject obj1, EmptyObject obj2)
+      {
+        return !(obj1 == obj2);
       }
     }
 
