@@ -10,9 +10,9 @@ namespace Redpenguin.GoogleSheets.Core
   {
     public List<ISheetDataContainer> Containers { get; set; } = new();
 
-    public T GetContainer<T>() where T : ISheetDataContainer
+    public ISheetDataProvider<T> GetProvider<T>() where T : ISheetData, new()
     {
-      foreach (var container in Containers.OfType<T>())
+      foreach (var container in Containers.OfType<SpreadSheetDataContainer<T>>())
       {
         return container;
       }
