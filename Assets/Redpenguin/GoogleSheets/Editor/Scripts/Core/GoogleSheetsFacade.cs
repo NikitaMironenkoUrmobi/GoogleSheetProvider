@@ -206,7 +206,7 @@ namespace Redpenguin.GoogleSheets.Editor.Core
       var tableSheets = GetCurrentProfileTableSheetsNames();
       var classesWithAttribute = _typesProvider.GetClassesWithAttribute<SpreadSheetAttribute>(
         attribute => tableSheets.Contains(attribute.SheetName)
-                     && (attribute.Profiles == null || attribute.Profiles.Contains(currentProfile.profileName)));
+                     && (attribute.Profiles == null || attribute.Profiles.Length == 0 || attribute.Profiles.Contains(currentProfile.profileName)));
       return classesWithAttribute;
     }
 
