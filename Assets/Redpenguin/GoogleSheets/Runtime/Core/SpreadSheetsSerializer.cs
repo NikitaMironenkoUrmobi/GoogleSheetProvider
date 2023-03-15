@@ -115,6 +115,7 @@ namespace Redpenguin.GoogleSheets.Core
     private string FixPath(string path)
     {
       var newPath = path.Split("Resources")[1];
+      if (newPath == String.Empty) return newPath;
       if (newPath[0] == '/' || newPath[0] == '\\')
       {
         newPath = newPath.Remove(0, 1);
