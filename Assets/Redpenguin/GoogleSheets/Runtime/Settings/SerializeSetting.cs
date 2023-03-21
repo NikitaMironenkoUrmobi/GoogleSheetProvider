@@ -20,6 +20,7 @@ namespace Redpenguin.GoogleSheets.Settings
     public string serializationRuleType;
     public string savePath = Empty;
     public string fileName = Empty;
+    public bool AddressableLoader = false;
     public List<SerializeSetting> serializeSettings = new();
   }
 }

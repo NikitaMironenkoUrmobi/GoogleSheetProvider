@@ -24,6 +24,7 @@ namespace Redpenguin.GoogleSheets.Editor.Profiles.Presenters
     private TextField _fileNameTextField;
     private DropdownField _serializationRuleDropdownField;
     private Button _buttonClearMeta;
+    private Toggle _toggleUseAddressables;
     public BoxContainerPresenter GroupBoxContainer { get; }
     private SerializeSettingsContainer SerializeSettingsContainer => _container.SerializeSettingsContainer;
 
@@ -41,12 +42,25 @@ namespace Redpenguin.GoogleSheets.Editor.Profiles.Presenters
       FileNameLink(serializationRuleSettingModel);
       SavePathLink(serializationRuleSettingModel);
       SerializationRuleLink(serializationRuleSettingModel);
-
+      AddressableLoaderLink(serializationRuleSettingModel);
+      
       ProfileNameLink(model, serializationRuleSettingModel);
       ProfileColorLink(model);
       TableIDLink(model);
       CredentialLink(model);
       ButtonClearMetaSetup(model);
+      
+    }
+
+    private void AddressableLoaderLink(SerializationRuleSetting serializationRuleSetting)
+    {
+      _toggleUseAddressables.SetValueWithoutNotify(serializationRuleSetting.AddressableLoader);
+      _toggleUseAddressables.RegisterValueChangedCallback(x =>
+        {
+          serializationRuleSetting.AddressableLoader = x.newValue;
+          EditorUtility.SetDirty(_container.SerializeSettingsContainer);
+        }
+      );
     }
 
     private void ButtonClearMetaSetup(ProfileModel model)
@@ -152,6 +166,7 @@ namespace Redpenguin.GoogleSheets.Editor.Profiles.Presenters
       _fileNameTextField = view.Q<TextField>("FileName");
       _serializationRuleDropdownField = view.Q<DropdownField>("SerializationRule");
       _buttonClearMeta = view.Q<Button>("ButtonClearMeta");
+      _toggleUseAddressables = view.Q<Toggle>("ToggleUseAddressables");
     }
     
     private List<Type> GetRules()
