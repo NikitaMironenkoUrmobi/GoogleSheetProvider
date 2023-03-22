@@ -47,7 +47,7 @@ namespace Redpenguin.GoogleSheets.DatabaseAddressableProvider
             var container = new SpreadSheetsDatabase();
             if (!serializeSettings.Exists(x => !x.saveSeparately)) return container;
             var path = _utils.FixAddressablePath(serializationRuleSetting.savePath);
-            var loadPath = Path.Combine(path, $"{serializationRuleSetting.fileName}.json");
+            var loadPath = Path.Combine(path, $"{serializationRuleSetting.fileName}.json").Replace("\\", "/");
             var (isLoaded, operationHandle) = await _assetProvider.LoadAsset<TextAsset>(loadPath);
             if (!isLoaded)
             {
@@ -68,7 +68,7 @@ namespace Redpenguin.GoogleSheets.DatabaseAddressableProvider
             foreach (var serializeSetting in serializeSettings.Where(x => x.saveSeparately))
             {
                 var path = _utils.FixAddressablePath(serializeSetting.savePath);
-                var loadPath = Path.Combine(path, $"{serializeSetting.fileName}.json");
+                var loadPath = Path.Combine(path, $"{serializeSetting.fileName}.json").Replace("\\", "/");;
                 var (isLoaded, operationHandle) = await _assetProvider.LoadAsset<TextAsset>(loadPath);
                 if (!isLoaded)
                 {
