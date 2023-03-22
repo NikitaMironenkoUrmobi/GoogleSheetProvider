@@ -37,7 +37,13 @@ namespace Redpenguin.GoogleSheets.Editor.Factories
       {
         assembly
           .GetTypes()
-          .Where(type => (type.GetCustomAttributes(typeof(T)) is List<T> attributes) && condition.Invoke(attributes))
+          .Where(type =>
+          {
+            if (type.GetCustomAttributes(typeof(T)) is not IEnumerable<T> attributes) return false;
+            var enumerable = attributes as T[] ?? attributes.ToArray();
+            return  enumerable.Count() != 0 &&
+                   condition.Invoke(enumerable.ToList());
+          })
           .ToList()
           .ForEach(x => list.Add(x));
       }
