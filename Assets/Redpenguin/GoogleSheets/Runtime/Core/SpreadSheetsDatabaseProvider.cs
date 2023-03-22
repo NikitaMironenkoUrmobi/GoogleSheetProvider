@@ -1,20 +1,18 @@
-﻿using Redpenguin.GoogleSheets.Settings;
-using UnityEngine;
-
-namespace Redpenguin.GoogleSheets.Core
+﻿namespace Redpenguin.GoogleSheets.Core
 {
-  public class SpreadSheetsDatabaseProvider
-  {
-    private readonly SerializeSettingsContainer _serializeSettings;
+    public class SpreadSheetsDatabaseProvider
+    {
+        private readonly ISerializeSettingsProvider _serializeSettingsProvider;
 
-    public SpreadSheetsDatabaseProvider()
-    {
-      _serializeSettings = Resources.Load<SerializeSettingsContainer>("SerializeSettingsContainer");
+        public SpreadSheetsDatabaseProvider()
+        {
+            _serializeSettingsProvider = new SerializeSettingsProvider();
+        }
+
+        public virtual SpreadSheetsDatabase Load(string profileName)
+        {
+            var serialization = new SpreadSheetsSerializer(profileName, _serializeSettingsProvider.SerializeSettings);
+            return serialization.DeserializeByRule();
+        }
     }
-    public virtual SpreadSheetsDatabase Load(string profileName)
-    {
-      var serialization = new SpreadSheetsSerializer(profileName, _serializeSettings);
-      return serialization.DeserializeByRule();
-    }
-  }
 }
