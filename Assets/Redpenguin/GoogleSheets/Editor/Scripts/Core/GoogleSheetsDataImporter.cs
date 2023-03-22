@@ -11,7 +11,7 @@ namespace Redpenguin.GoogleSheets.Editor.Core
 {
   public interface IGoogleSheetsDataImporter
   {
-    void LoadDataToContainers(List<ISheetDataContainer> loadContainers, string tableID);
+    void LoadDataToContainers(List<ISheetDataContainer> loadContainers, string tableID, string profileName);
   }
 
   public class GoogleSheetsDataImporter : IGoogleSheetsDataImporter
@@ -23,11 +23,11 @@ namespace Redpenguin.GoogleSheets.Editor.Core
       _googleSheetsReader = googleSheetsReader;
     }
 
-    public void LoadDataToContainers(List<ISheetDataContainer> loadContainers, string tableID)
+    public void LoadDataToContainers(List<ISheetDataContainer> loadContainers, string tableID, string profileName)
     {
       foreach (var sheetDataContainer in loadContainers)
       {
-        var sheetValues = GetSheetValues(sheetDataContainer.SheetDataType, tableID);
+        var sheetValues = GetSheetValues(sheetDataContainer.SheetDataType, tableID, profileName);
         var dataList = sheetDataContainer.GetType().GetFields().FirstOrDefault(x => (x.GetValue(sheetDataContainer) is IList));
         if(dataList == null) return;
         sheetDataContainer.SetListCount(sheetValues.First().Value.Count);
@@ -131,10 +131,11 @@ namespace Redpenguin.GoogleSheets.Editor.Core
       }
     }
 
-    private Dictionary<string, List<object>> GetSheetValues(Type databaseType, string tableID)
+    private Dictionary<string, List<object>> GetSheetValues(Type databaseType, string tableID, string profileName)
     {
-      var spreadSheetRange = databaseType.GetAttributeValue((SpreadSheetAttribute st) => st.Range);
-      return _googleSheetsReader.GetValuesOnRange(tableID, spreadSheetRange);
+      var spreadSheetRange = databaseType.GetCustomAttributes(typeof(SpreadSheetAttribute), true) as SpreadSheetAttribute[];
+      var range = spreadSheetRange.First(x => string.IsNullOrEmpty(x.Profile) || x.Profile == profileName);
+      return _googleSheetsReader.GetValuesOnRange(tableID, range.Range);
     }
 
     private object IsJson(Type type, object value)

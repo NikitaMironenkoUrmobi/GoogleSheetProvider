@@ -206,7 +206,7 @@ namespace Redpenguin.GoogleSheets.Editor.Core
             {
                 _googleSheetsDataImporter.LoadDataToContainers(
                     containers.Where(x => currentProfile.metaData.GetMeta(x.SheetDataType.ToString()).isLoad).ToList(),
-                    currentProfile.tableID);
+                    currentProfile.tableID, currentProfile.profileName);
                 SpreadSheetSoList.ForEach(x => EditorUtility.SetDirty(x as ScriptableObject));
             }
 
@@ -249,7 +249,8 @@ namespace Redpenguin.GoogleSheets.Editor.Core
                 return;
             }
 
-            _googleSheetsDataImporter.LoadDataToContainers(containers, _profilesContainer.CurrentProfile.tableID);
+            _googleSheetsDataImporter.LoadDataToContainers(containers, _profilesContainer.CurrentProfile.tableID,
+                currentProfile.profileName);
             SerializeContainers(containers);
         }
 
@@ -265,7 +266,7 @@ namespace Redpenguin.GoogleSheets.Editor.Core
                 if (currentProfile.metaData.loadFromRemote)
                 {
                     _googleSheetsDataImporter.LoadDataToContainers(containers,
-                        _profilesContainer.CurrentProfile.tableID);
+                        _profilesContainer.CurrentProfile.tableID, currentProfile.profileName);
                     SpreadSheetSoList.ForEach(x => EditorUtility.SetDirty(x as ScriptableObject));
                 }
 
@@ -274,7 +275,8 @@ namespace Redpenguin.GoogleSheets.Editor.Core
             else
             {
                 var containers = _typesProvider.CreateSheetDataContainers(new List<Type> {dataType});
-                _googleSheetsDataImporter.LoadDataToContainers(containers, _profilesContainer.CurrentProfile.tableID);
+                _googleSheetsDataImporter.LoadDataToContainers(containers, _profilesContainer.CurrentProfile.tableID,
+                    currentProfile.profileName);
                 SerializeContainers(containers);
             }
         }
