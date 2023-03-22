@@ -8,6 +8,7 @@ namespace Redpenguin.GoogleSheets.Settings
   {
     [SerializeField] private List<SerializationRuleSetting> serializationRuleSetting = new();
 
+    public List<SerializationRuleSetting> SerializationRuleSetting => serializationRuleSetting;
     public SerializeSetting GetSerializeSetting(string profile, string containerType)
     {
       var rule = GetSerializeRuleSetting(profile);
