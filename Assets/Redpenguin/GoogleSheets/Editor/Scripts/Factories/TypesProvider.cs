@@ -10,7 +10,7 @@ namespace Redpenguin.GoogleSheets.Editor.Factories
   {
     List<Type> GetClassesWithAttribute<T>() where T : Attribute;
     List<ISheetDataContainer> CreateSheetDataContainers(List<Type> types);
-    List<Type> GetClassesWithAttribute<T>(Func<T, bool> condition) where T : Attribute;
+    List<Type> GetClassesWithAttributes<T>(Func<List<T>, bool> condition) where T : Attribute;
   }
 
   public class TypesProvider : ITypesProvider
@@ -30,14 +30,14 @@ namespace Redpenguin.GoogleSheets.Editor.Factories
       return list;
     }
 
-    public List<Type> GetClassesWithAttribute<T>(Func<T, bool> condition) where T : Attribute
+    public List<Type> GetClassesWithAttributes<T>(Func<List<T>, bool> condition) where T : Attribute
     {
       var list = new List<Type>();
       foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
       {
         assembly
           .GetTypes()
-          .Where(type => (type.GetCustomAttribute(typeof(T)) is T attribute) && condition.Invoke(attribute))
+          .Where(type => (type.GetCustomAttributes(typeof(T)) is List<T> attributes) && condition.Invoke(attributes))
           .ToList()
           .ForEach(x => list.Add(x));
       }

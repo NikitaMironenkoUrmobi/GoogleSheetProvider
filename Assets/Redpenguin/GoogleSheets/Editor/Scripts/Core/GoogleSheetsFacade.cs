@@ -80,8 +80,8 @@ namespace Redpenguin.GoogleSheets.Editor.Core
     {
       var currentProfile = _profilesContainer.CurrentProfile;
       var typeList =
-        _typesProvider.GetClassesWithAttribute<SheetRangeAttribute>(attribute =>
-          attribute.Profile == currentProfile.profileName);
+        _typesProvider.GetClassesWithAttributes<SheetRangeAttribute>(attribute =>
+          attribute.Exists(x => x.Profile == currentProfile.profileName));
       SpreadSheetSoList = list.Where(x => typeList.Contains(x.GetType())).ToList();
     }
 
@@ -147,8 +147,8 @@ namespace Redpenguin.GoogleSheets.Editor.Core
     public void CreateScriptableObjects()
     {
       var currentProfile = _profilesContainer.CurrentProfile;
-      _scriptableObjectFactory.Create(_typesProvider.GetClassesWithAttribute<SheetRangeAttribute>(
-          attribute => attribute.Profile == currentProfile.profileName),
+      _scriptableObjectFactory.Create(_typesProvider.GetClassesWithAttributes<SheetRangeAttribute>(
+          attribute => attribute.Exists(x => x.Profile == currentProfile.profileName)),
         currentProfile.profileName);
       //SearchForSpreadSheets();
     }
@@ -161,11 +161,17 @@ namespace Redpenguin.GoogleSheets.Editor.Core
       var tableSheets = GetCurrentProfileTableSheetsNames();
       var spreadSheetClasses = GetProfileDataClass();
 
-      var sheetRange = _typesProvider.GetClassesWithAttribute<SheetRangeAttribute>(attribute =>
-        attribute.Profile == currentProfile.profileName
-        && tableSheets.Contains(attribute.DataType.GetAttributeValue((SpreadSheetAttribute st) => st.SheetName)));
+      var sheetRange = _typesProvider.GetClassesWithAttributes<SheetRangeAttribute>(attributes =>
+        IsContains(attributes, currentProfile, tableSheets));
 
       return spreadSheetClasses.Count > sheetRange.Count;
+    }
+
+    private bool IsContains(List<SheetRangeAttribute> attributes, ProfileModel currentProfile, List<string> tableSheets)
+    {
+      var attribute = attributes.Find(x => x.Profile == currentProfile.profileName);
+      return attribute != null && tableSheets.Contains(attribute.DataType
+        .GetAttributeValue((SpreadSheetAttribute st) => st.SheetName));
     }
 
     public void SerializeSheetData()
@@ -204,10 +210,20 @@ namespace Redpenguin.GoogleSheets.Editor.Core
     {
       var currentProfile = _profilesContainer.CurrentProfile;
       var tableSheets = GetCurrentProfileTableSheetsNames();
-      var classesWithAttribute = _typesProvider.GetClassesWithAttribute<SpreadSheetAttribute>(
-        attribute => tableSheets.Contains(attribute.SheetName)
-                     && (string.IsNullOrEmpty(attribute.Profile) || attribute.Profile == currentProfile.profileName));
+      var classesWithAttribute = _typesProvider.GetClassesWithAttributes<SpreadSheetAttribute>(
+        attributes => ProfileDataClassCheck(attributes, currentProfile, tableSheets));
       return classesWithAttribute;
+    }
+
+    private bool ProfileDataClassCheck(List<SpreadSheetAttribute> attributes, ProfileModel currentProfile, List<string> tableSheets)
+    {
+      var attribute = attributes.Find(x => x.Profile == currentProfile.profileName);
+      if (attribute != null)
+      {
+        return tableSheets.Contains(attribute.SheetName);
+      }
+      var firstAttribute = attributes.First();
+      return tableSheets.Contains(firstAttribute.SheetName) && string.IsNullOrEmpty(firstAttribute.Profile);
     }
 
     private void SerializeSheetDataContainers()
