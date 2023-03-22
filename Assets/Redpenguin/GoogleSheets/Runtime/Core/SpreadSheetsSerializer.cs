@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Redpenguin.GoogleSheets.Settings;
 using Redpenguin.GoogleSheets.Settings.SerializationRules;
 using UnityEngine;
@@ -15,21 +16,22 @@ namespace Redpenguin.GoogleSheets.Core
 
   public class SpreadSheetsSerializer : ISpreadSheetsSerializer
   {
-    private readonly SerializeSettingsContainer _settingsContainerContainer;
+    private readonly SerializeSettingsContainer _serializeSettings;
     private readonly string _profileName;
-
-    public SpreadSheetsSerializer(string profileName, SerializeSettingsContainer settingsContainerContainer)
+    private readonly SpreadSheetsSerializerUtils _utils;
+    public SpreadSheetsSerializer(string profileName, SerializeSettingsContainer serializeSettings)
     {
       _profileName = profileName;
-      _settingsContainerContainer = settingsContainerContainer;
+      _serializeSettings = serializeSettings;
+      _utils = new SpreadSheetsSerializerUtils(_profileName);
     }
 
     public void SerializationByRule(List<ISheetDataContainer> sheetDataContainers)
     {
-      var serializationRuleSetting = _settingsContainerContainer.GetSerializeRuleSetting(_profileName);
-      if (RuleTypeEmpty(serializationRuleSetting.serializationRuleType)) return;
+      var serializationRuleSetting = _serializeSettings.GetSerializeRuleSetting(_profileName);
+      if (_utils.RuleTypeEmpty(serializationRuleSetting.serializationRuleType)) return;
       var type = Type.GetType(serializationRuleSetting.serializationRuleType);
-      TypeError(type);
+      _utils.TypeError(type);
 
       var serializationRule =
         type == null ? new JsonSerializationRule() : Activator.CreateInstance(type) as SerializationRule;
@@ -38,7 +40,7 @@ namespace Redpenguin.GoogleSheets.Core
       foreach (var sheetDataContainer in sheetDataContainers)
       {
         var metaData =
-          _settingsContainerContainer.GetSerializeSetting(_profileName, sheetDataContainer.SheetDataType.ToString());
+          _serializeSettings.GetSerializeSetting(_profileName, sheetDataContainer.SheetDataType.ToString());
         if (!metaData.saveSeparately)
         {
           container.AddContainer(sheetDataContainer);
@@ -63,90 +65,68 @@ namespace Redpenguin.GoogleSheets.Core
 
     public SpreadSheetsDatabase DeserializeByRule()
     {
-      var serializationRuleSetting = _settingsContainerContainer.GetSerializeRuleSetting(_profileName);
-      var serializeSettings = _settingsContainerContainer.GetSerializeSetting(_profileName);
-      if (RuleTypeEmpty(serializationRuleSetting.serializationRuleType)) return null;
+      var serializationRuleSetting = _serializeSettings.GetSerializeRuleSetting(_profileName);
+      var serializeSettings = _serializeSettings.GetSerializeSetting(_profileName);
+      if (_utils.RuleTypeEmpty(serializationRuleSetting.serializationRuleType)) return null;
       var type = Type.GetType(serializationRuleSetting.serializationRuleType);
-      TypeError(type);
+      _utils.TypeError(type);
       var serializationRule =
         type == null ? new JsonSerializationRule() : Activator.CreateInstance(type) as SerializationRule;
 
-      var container = new SpreadSheetsDatabase();
-      if (serializeSettings.Exists(x => !x.saveSeparately))
-      {
-        var path = FixPath(serializationRuleSetting.savePath);
-        var loadPath = Path.Combine(path, serializationRuleSetting.fileName);
-        var textAsset = Resources.Load<TextAsset>(loadPath);
-        if (textAsset == null)
-        {
-          Debug.LogError(
-            $"{serializationRuleSetting.fileName} cant load from path {loadPath}. Make sure that file under Resource folder.");
-        }
-        else
-        {
-          container = serializationRule?.Deserialization<SpreadSheetsDatabase>(textAsset.text);
-          Debug.Log(
-            $"Load {serializationRuleSetting.fileName} from Resources\\{loadPath}".WithColor(ColorExt.CompletedColor));
-        }
-      }
-
-      foreach (var serializeSetting in serializeSettings)
-      {
-        if (serializeSetting.saveSeparately)
-        {
-          var path = FixPath(serializeSetting.savePath);
-          var loadPath = Path.Combine(path, serializeSetting.fileName);
-          var textAsset = Resources.Load<TextAsset>(loadPath);
-          if (textAsset == null)
-          {
-            Debug.LogError(
-              $"{serializeSetting.fileName} cant load from path {loadPath}. Make sure that file under Resource folder.");
-            continue;
-          }
-
-          container?.AddContainer(serializationRule?.Deserialization<ISheetDataContainer>(textAsset.text));
-          Debug.Log($"Load {serializeSetting.fileName} from Resources\\{loadPath}".WithColor(ColorExt.CompletedColor));
-        }
-      }
+      var container = DeserializeTogether(serializeSettings, serializationRuleSetting, serializationRule);
+      container = DeserializeSeparately(serializeSettings, container, serializationRule);
 
       return container;
     }
 
-    private string FixPath(string path)
+    private SpreadSheetsDatabase DeserializeTogether(
+      List<SerializeSetting> serializeSettings,
+      SerializationRuleSetting serializationRuleSetting,
+      SerializationRule serializationRule)
     {
-      var newPath = path.Split("Resources")[1];
-      if (newPath == String.Empty) return newPath;
-      if (newPath[0] == '/' || newPath[0] == '\\')
-      {
-        newPath = newPath.Remove(0, 1);
-      }
-
-      if (newPath[^1] == '/' || newPath[^1] == '\\')
-      {
-        newPath = newPath.Remove(newPath.Length - 1, 1);
-      }
-
-      return newPath;
-    }
-
-    private bool RuleTypeEmpty(string serializationRuleSetting)
-    {
-      if (serializationRuleSetting == string.Empty)
-      {
-        Debug.LogError($"SerializationRule for {_profileName} doesn't exist.");
-        return true;
-      }
-
-      return false;
-    }
-
-    private void TypeError(Type type)
-    {
-      if (type == null)
+      var container = new SpreadSheetsDatabase();
+      if (!serializeSettings.Exists(x => !x.saveSeparately)) return container;
+      var path = _utils.FixResourcesPath(serializationRuleSetting.savePath);
+      var loadPath = Path.Combine(path, serializationRuleSetting.fileName);
+      var textAsset = Resources.Load<TextAsset>(loadPath);
+      if (textAsset == null)
       {
         Debug.LogError(
-          $"SerializationRuleType of {_profileName} profile doesn't exist. Serialize with JsonSerializationRule");
+          $"{serializationRuleSetting.fileName} cant load from path {loadPath}. Make sure that file under Resource folder.");
       }
+      else
+      {
+        container = serializationRule?.Deserialization<SpreadSheetsDatabase>(textAsset.text);
+        Debug.Log(
+          $"Load {serializationRuleSetting.fileName} from Resources\\{loadPath}".WithColor(
+            ColorExt.CompletedColor));
+      }
+      return container;
+    }
+
+    private SpreadSheetsDatabase DeserializeSeparately(
+      List<SerializeSetting> serializeSettings, 
+      SpreadSheetsDatabase container,
+      SerializationRule serializationRule)
+    {
+      
+      foreach (var serializeSetting in serializeSettings.Where(x => x.saveSeparately))
+      {
+        var path = _utils.FixResourcesPath(serializeSetting.savePath);
+        var loadPath = Path.Combine(path, serializeSetting.fileName);
+        var textAsset = Resources.Load<TextAsset>(loadPath);
+        if (textAsset == null)
+        {
+          Debug.LogError(
+            $"{serializeSetting.fileName} cant load from path {loadPath}. Make sure that file under Resource folder.");
+          continue;
+        }
+
+        container.AddContainer(serializationRule?.Deserialization<ISheetDataContainer>(textAsset.text));
+        Debug.Log($"Load {serializeSetting.fileName} from Resources\\{loadPath}".WithColor(ColorExt.CompletedColor));
+      }
+
+      return container;
     }
   }
 }
