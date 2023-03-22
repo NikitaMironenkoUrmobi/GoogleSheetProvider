@@ -1,10 +1,12 @@
 {
-    "name": "AddressablesLoad.Runtime",
+    "name": "DatabaseAddressableProvider.Runtime",
     "rootNamespace": "",
     "references": [
-        "GUID:7eb3eed3dbc89c84085418e7bd7a5b03",
+        "GUID:871a86c52494100418f6a0048c2c47a6",
         "GUID:f51ebe6a0ceec4240a699833d6309b23",
-        "GUID:593a5b492d29ac6448b1ebf7f035ef33"
+        "GUID:593a5b492d29ac6448b1ebf7f035ef33",
+        "GUID:9e24947de15b9834991c9d8411ea37cf",
+        "GUID:84651a3751eca9349aac36a66bba901b"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
