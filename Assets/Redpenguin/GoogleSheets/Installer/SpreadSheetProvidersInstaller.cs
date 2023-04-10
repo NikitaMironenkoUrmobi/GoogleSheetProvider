@@ -32,7 +32,7 @@ namespace Redpenguin.GoogleSheets.Installer
 
     private void Reset()
     {
-      profiles = Resources.Load<SerializeSettingsContainer>("SerializeSettingsContainer")
+      profiles = Resources.Load<SerializeSettingsContainer>(SpreadSheets.SerializeSettingsPath)
         .SerializationRuleSetting
         .Select(x => x.profile)
         .ToList();
