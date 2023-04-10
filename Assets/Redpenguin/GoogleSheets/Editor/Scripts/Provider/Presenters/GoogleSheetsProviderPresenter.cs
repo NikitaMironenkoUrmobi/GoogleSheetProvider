@@ -132,13 +132,13 @@ namespace Redpenguin.GoogleSheets.Editor.Provider.Presenters
         view.Add(csharpHelpBox);
       }
 
-      if (currentProfile.credential == null)
+      if (string.IsNullOrEmpty(currentProfile.CredentialPath))
       {
         var csharpHelpBox = new HelpBox("Current profile credential doesn't setup", HelpBoxMessageType.Warning);
         view.Add(csharpHelpBox);
       }
 
-      if (currentProfile.tableID == string.Empty || currentProfile.credential == null)
+      if (currentProfile.tableID == string.Empty || string.IsNullOrEmpty(currentProfile.CredentialPath))
       {
         var button = new Button(() => EditorApplication.ExecuteMenuItem("GoogleSheets/Profiles"))
         {

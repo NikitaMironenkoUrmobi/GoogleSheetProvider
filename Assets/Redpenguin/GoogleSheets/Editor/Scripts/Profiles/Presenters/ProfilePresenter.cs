@@ -16,7 +16,7 @@ namespace Redpenguin.GoogleSheets.Editor.Profiles.Presenters
   {
     private TextField _profileNameTextField;
     private TextField _tableFieldID;
-    private ObjectField _credentialObjectField;
+    private TextField _credentialTextField;
     private ColorField _profileColorField;
     private TextField _savePathTextField;
     private readonly ProfilesContainer _container;
@@ -25,6 +25,7 @@ namespace Redpenguin.GoogleSheets.Editor.Profiles.Presenters
     private DropdownField _serializationRuleDropdownField;
     private Button _buttonClearMeta;
     private Toggle _toggleUseAddressables;
+    private Button _buttonBrowser;
     public BoxContainerPresenter GroupBoxContainer { get; }
     private SerializeSettingsContainer SerializeSettingsContainer => _container.SerializeSettingsContainer;
 
@@ -49,7 +50,7 @@ namespace Redpenguin.GoogleSheets.Editor.Profiles.Presenters
       TableIDLink(model);
       CredentialLink(model);
       ButtonClearMetaSetup(model);
-      
+      ButtonBrowser();
     }
 
     private void AddressableLoaderLink(SerializationRuleSetting serializationRuleSetting)
@@ -69,6 +70,17 @@ namespace Redpenguin.GoogleSheets.Editor.Profiles.Presenters
       {
         _container.ClearMeta(model.profileName);
         EditorUtility.SetDirty(_container);
+      };
+    }
+    private void ButtonBrowser()
+    {
+      _buttonBrowser.clickable.clicked += () =>
+      {
+        var path = EditorUtility.OpenFilePanel("Select Credential File", "", "json");
+        if (path.Length != 0)
+        {
+          _credentialTextField.value = path;
+        }
       };
     }
 
@@ -137,11 +149,11 @@ namespace Redpenguin.GoogleSheets.Editor.Profiles.Presenters
     }
     private void CredentialLink(ProfileModel model)
     {
-      if (model.credential != null)
-        _credentialObjectField.SetValueWithoutNotify(model.credential);
-      _credentialObjectField.RegisterValueChangedCallback(x =>
+      if (!IsNullOrEmpty(model.CredentialPath))
+        _credentialTextField.SetValueWithoutNotify(model.CredentialPath);
+      _credentialTextField.RegisterValueChangedCallback(x =>
       {
-        model.credential = (TextAsset) x.newValue;
+        model.CredentialPath = x.newValue;
         EditorUtility.SetDirty(_container);
       });
     }
@@ -159,7 +171,7 @@ namespace Redpenguin.GoogleSheets.Editor.Profiles.Presenters
     {
       _profileNameTextField = view.Q<TextField>("ProfileName");
       _tableFieldID = view.Q<TextField>("TableID");
-      _credentialObjectField = view.Q<ObjectField>("Credential");
+      _credentialTextField = view.Q<TextField>("Credential");
       _profileColorField = view.Q<ColorField>("ProfileColor");
       _savePathTextField = view.Q<TextField>("SavePath");
       _profileLabelTextField = view.Q<Label>("ProfileLabel");
@@ -167,6 +179,7 @@ namespace Redpenguin.GoogleSheets.Editor.Profiles.Presenters
       _serializationRuleDropdownField = view.Q<DropdownField>("SerializationRule");
       _buttonClearMeta = view.Q<Button>("ButtonClearMeta");
       _toggleUseAddressables = view.Q<Toggle>("ToggleUseAddressables");
+      _buttonBrowser = view.Q<Button>("ButtonBrowser");
     }
     
     private List<Type> GetRules()

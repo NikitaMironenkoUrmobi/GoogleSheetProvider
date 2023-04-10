@@ -8,7 +8,10 @@
             <uie:ColorField value="RGBA(0.000, 1.000, 1.000, 1.000)" name="ProfileColor" style="width: 15%;" />
         </ui:VisualElement>
         <ui:TextField picking-mode="Ignore" text="Table ID" name="TableID" />
-        <uie:ObjectField type="UnityEngine.TextAsset,UnityEngine.CoreModule" name="Credential" style="justify-content: space-around;" />
+        <ui:VisualElement style="flex-grow: 1; background-color: rgba(0, 0, 0, 0); flex-direction: row; justify-content: space-around; width: 100%; padding-right: 3px; padding-left: 3px;">
+            <ui:TextField picking-mode="Ignore" value="Credential Path" name="Credential" style="width: 80%;" />
+            <ui:Button text="Browse" display-tooltip-when-elided="true" name="ButtonBrowser" style="width: 20%;" />
+        </ui:VisualElement>
         <ui:VisualElement style="flex-direction: row; justify-content: space-around; margin-left: 3px; margin-right: 3px;">
             <ui:TextField picking-mode="Ignore" text="Save Path" name="SavePath" style="width: 60%;" />
             <ui:TextField picking-mode="Ignore" text="File Name" name="FileName" style="width: 40%;" />

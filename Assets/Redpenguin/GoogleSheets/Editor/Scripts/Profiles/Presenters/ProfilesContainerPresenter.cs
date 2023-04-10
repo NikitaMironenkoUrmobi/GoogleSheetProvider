@@ -1,9 +1,10 @@
+using System;
 using System.Collections.Generic;
 using Redpenguin.GoogleSheets.Editor.Profiles.Model;
 using Redpenguin.GoogleSheets.Editor.Utils;
 using UnityEditor;
-using UnityEngine;
 using UnityEngine.UIElements;
+using Random = UnityEngine.Random;
 
 namespace Redpenguin.GoogleSheets.Editor.Profiles.Presenters
 {
@@ -38,7 +39,8 @@ namespace Redpenguin.GoogleSheets.Editor.Profiles.Presenters
       {
         var profileModel = new ProfileModel{
           profileName = $"Profile_{Random.Range(1, 10000)}", 
-          color = Random.ColorHSV()
+          color = Random.ColorHSV(),
+          Guid = Guid.NewGuid().ToString()
         };
         _profilesContainer.AddNewProfile(profileModel);
         _profilesContainer.SerializeSettingsContainer.GetSerializeRuleSetting(profileModel.profileName);

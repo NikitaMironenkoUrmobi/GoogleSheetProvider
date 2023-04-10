@@ -54,7 +54,7 @@ namespace Redpenguin.GoogleSheets.Editor.Core
             if (!_profilesContainer.HasValidProfile) return;
 
             var currentProfile = _profilesContainer.CurrentProfile;
-            if (currentProfile.tableID == string.Empty || currentProfile.credential == null)
+            if (currentProfile.tableID == string.Empty || string.IsNullOrEmpty(currentProfile.CredentialPath))
             {
                 _consoleLogger.LogProfileCredentialNullException(currentProfile.profileName);
                 return;
@@ -62,13 +62,19 @@ namespace Redpenguin.GoogleSheets.Editor.Core
 
             SetupContainers(spreadSheetSoList);
 
-            _googleSheetsReader = new GoogleSheetsReader(_profilesContainer.CurrentProfile.credential.text);
+            _googleSheetsReader = new GoogleSheetsReader(ReadCredential(_profilesContainer.CurrentProfile.CredentialPath));
             _googleSheetsDataImporter = new GoogleSheetsDataImporter(_googleSheetsReader);
 
 
             _scriptsFactory = new SpreadSheetCodeFactory(_consoleLogger);
             _scriptableObjectFactory = new SpreadSheetScriptableObjectFactory();
         }
+
+        private string ReadCredential(string path)
+        {
+            return File.ReadAllText(path);
+        }
+        
 
 
         public void CantFindClassWithAttribute()
@@ -93,7 +99,7 @@ namespace Redpenguin.GoogleSheets.Editor.Core
                 return;
             }
 
-            _googleSheetsReader = new GoogleSheetsReader(profileModel.credential.text);
+            _googleSheetsReader = new GoogleSheetsReader(ReadCredential(profileModel.CredentialPath));
             _googleSheetsDataImporter = new GoogleSheetsDataImporter(_googleSheetsReader);
             SetupContainers(containers);
             SearchForSpreadSheets();
@@ -156,7 +162,7 @@ namespace Redpenguin.GoogleSheets.Editor.Core
         {
             if (!_profilesContainer.CurrentProfile.metaData.useSoContainers) return false;
             var currentProfile = _profilesContainer.CurrentProfile;
-            if (currentProfile.credential == null || currentProfile.tableID == string.Empty) return false;
+            if (currentProfile.CredentialPath == null || currentProfile.tableID == string.Empty) return false;
             var tableSheets = GetCurrentProfileTableSheetsNames();
             var spreadSheetClasses = GetProfileDataClass();
 
