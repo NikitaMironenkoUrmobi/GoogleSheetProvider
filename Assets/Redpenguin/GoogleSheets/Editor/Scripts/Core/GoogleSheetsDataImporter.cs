@@ -94,7 +94,7 @@ namespace Redpenguin.GoogleSheets.Editor.Core
     {
       public bool Equals(EmptyObject other)
       {
-        return Equals(Obj, other.Obj);
+        return this == other;
       }
 
       public override bool Equals(object obj)
@@ -122,7 +122,7 @@ namespace Redpenguin.GoogleSheets.Editor.Core
 
       public static bool operator ==(EmptyObject obj1, EmptyObject obj2)
       {
-        return obj1.Obj == obj2.Obj;
+        return obj1.Obj == obj2.Obj && obj1.Row == obj2.Row;
       }
 
       public static bool operator !=(EmptyObject obj1, EmptyObject obj2)
