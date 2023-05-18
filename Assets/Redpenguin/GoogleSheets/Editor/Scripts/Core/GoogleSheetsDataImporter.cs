@@ -43,7 +43,8 @@ namespace Redpenguin.GoogleSheets.Editor.Core
       for (var i = 0; i < dataList.Count; i++)
       {
         var dataClass = dataList[i];
-        var dataClassFields = dataClass.GetType().GetFields();
+        var dataClassFields = dataClass.GetType()
+          .GetFields(BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
         foreach (var field in dataClassFields)
         {
           var fieldName = field.Name;
